@@ -1,119 +1,89 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const STORAGE_KEYS = {
-  coins: 'nonograms_code_picture_coins',
-  progress: 'nonograms_code_picture_progress_v1',
-  theme: 'nonograms_code_picture_theme',
-  lang: 'nonograms_code_picture_lang',
+  coins: 'nonograms_code_picture_coins_v2',
+  progress: 'nonograms_code_picture_progress_v2',
+  theme: 'nonograms_code_picture_theme_v2',
+  lang: 'nonograms_code_picture_lang_v2',
 };
 
 const WIN_TARGET = 5;
-const START_COINS = 120;
+const START_COINS = 180;
 const BUY_LIFE_PRICE = 50;
 const HINT_PRICE = 20;
 
 const DIFFICULTIES = [
-  { id: 'easy', size: 5, reward: 20, lives: 3, ru: 'Лёгкий', en: 'Easy', metaRu: '5×5 · быстрые рисунки', metaEn: '5×5 · quick pictures' },
-  { id: 'medium', size: 7, reward: 30, lives: 3, ru: 'Средний', en: 'Medium', metaRu: '7×7 · больше логики', metaEn: '7×7 · more logic' },
-  { id: 'hard', size: 10, reward: 45, lives: 3, ru: 'Сложный', en: 'Hard', metaRu: '10×10 · плотные подсказки', metaEn: '10×10 · dense clues' },
-  { id: 'expert', size: 12, reward: 60, lives: 3, ru: 'Эксперт', en: 'Expert', metaRu: '12×12 · большой рисунок', metaEn: '12×12 · large picture' },
+  { id: 'warmup', size: 5, reward: 12, lives: 3, starterCrosses: true, ru: 'Разминка', en: 'Warm-up', metaRu: '5×5 · часть пустых клеток уже отмечена', metaEn: '5×5 · some empty cells are marked' },
+  { id: 'easy', size: 5, reward: 18, lives: 3, starterCrosses: false, ru: 'Лёгкий', en: 'Easy', metaRu: '5×5 · короткие рисунки', metaEn: '5×5 · small pictures' },
+  { id: 'medium', size: 10, reward: 35, lives: 3, starterCrosses: false, ru: 'Средний', en: 'Medium', metaRu: '10×10 · полноценная логика', metaEn: '10×10 · full logic' },
+  { id: 'hard', size: 15, reward: 55, lives: 3, starterCrosses: false, ru: 'Сложный', en: 'Hard', metaRu: '15×15 · крупный силуэт', metaEn: '15×15 · larger silhouette' },
+  { id: 'epic', size: 20, reward: 85, lives: 3, starterCrosses: false, ru: 'Эпический', en: 'Epic', metaRu: '20×20 · большая картинка', metaEn: '20×20 · big picture' },
+  { id: 'abyss', size: 30, reward: 130, lives: 3, starterCrosses: false, ru: 'Бездна', en: 'Abyss', metaRu: '30×30 · максимальный формат', metaEn: '30×30 · maximum format' },
 ];
 
 const PUZZLES = {
+  warmup: [
+    { id: 'heart5', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
+    { id: 'house5', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
+    { id: 'smile5', nameRu: 'Улыбка', nameEn: 'Smile', rows: ['00000', '10101', '00000', '10001', '01110'] },
+    { id: 'tree5', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
+    { id: 'star5', nameRu: 'Звезда', nameEn: 'Star', rows: ['00100', '10101', '01110', '10101', '00100'] },
+    { id: 'cup5', nameRu: 'Кубок', nameEn: 'Cup', rows: ['11111', '10101', '01110', '00100', '01110'] },
+  ],
   easy: [
-    {
-      nameRu: 'Сердце',
-      nameEn: 'Heart',
-      rows: ['01010', '11111', '11111', '01110', '00100'],
-    },
-    {
-      nameRu: 'Домик',
-      nameEn: 'House',
-      rows: ['00100', '01110', '11111', '10101', '11111'],
-    },
-    {
-      nameRu: 'Улыбка',
-      nameEn: 'Smile',
-      rows: ['00000', '10101', '00000', '10001', '01110'],
-    },
-    {
-      nameRu: 'Крест',
-      nameEn: 'Cross',
-      rows: ['00100', '00100', '11111', '00100', '00100'],
-    },
+    { id: 'heart5', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
+    { id: 'house5', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
+    { id: 'smile5', nameRu: 'Улыбка', nameEn: 'Smile', rows: ['00000', '10101', '00000', '10001', '01110'] },
+    { id: 'tree5', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
+    { id: 'rocket5', nameRu: 'Ракета', nameEn: 'Rocket', rows: ['00100', '01110', '00100', '01110', '10101'] },
+    { id: 'fish5', nameRu: 'Рыбка', nameEn: 'Fish', rows: ['00110', '11101', '11110', '11101', '00110'] },
   ],
   medium: [
-    {
-      nameRu: 'Цветок',
-      nameEn: 'Flower',
-      rows: ['0011100', '0111110', '1101011', '1111111', '0111110', '0011100', '0001000'],
-    },
-    {
-      nameRu: 'Кот',
-      nameEn: 'Cat',
-      rows: ['1000001', '1100011', '1010101', '1111111', '0111110', '0100010', '0100010'],
-    },
-    {
-      nameRu: 'Алмаз',
-      nameEn: 'Diamond',
-      rows: ['0001000', '0011100', '0111110', '1111111', '0111110', '0011100', '0001000'],
-    },
-    {
-      nameRu: 'Ракета',
-      nameEn: 'Rocket',
-      rows: ['0001000', '0011100', '0111110', '0011100', '0011100', '0101010', '1000001'],
-    },
+    { id: 'flower10', nameRu: 'Цветок', nameEn: 'Flower', draw: 'flower' },
+    { id: 'cat10', nameRu: 'Кот', nameEn: 'Cat', draw: 'cat' },
+    { id: 'rocket10', nameRu: 'Ракета', nameEn: 'Rocket', draw: 'rocket' },
+    { id: 'fish10', nameRu: 'Рыба', nameEn: 'Fish', draw: 'fish' },
+    { id: 'key10', nameRu: 'Ключ', nameEn: 'Key', draw: 'key' },
+    { id: 'diamond10', nameRu: 'Алмаз', nameEn: 'Diamond', draw: 'diamond' },
+    { id: 'tree10', nameRu: 'Дерево', nameEn: 'Tree', draw: 'tree' },
+    { id: 'ghost10', nameRu: 'Призрак', nameEn: 'Ghost', draw: 'ghost' },
   ],
   hard: [
-    {
-      nameRu: 'Кубок',
-      nameEn: 'Cup',
-      rows: ['0011111100', '0111111110', '1101111011', '1101111011', '0111111110', '0011111100', '0001111000', '0001111000', '0011111100', '0111111110'],
-    },
-    {
-      nameRu: 'Ключ',
-      nameEn: 'Key',
-      rows: ['0001110000', '0010001000', '0100000100', '0100000100', '0010001000', '0001111111', '0000010010', '0000010010', '0000011110', '0000000000'],
-    },
-    {
-      nameRu: 'Звезда',
-      nameEn: 'Star',
-      rows: ['0000110000', '0001111000', '1111111111', '0111111110', '0011111100', '0011111100', '0110110110', '1100110011', '0000110000', '0000110000'],
-    },
-    {
-      nameRu: 'Призрак',
-      nameEn: 'Ghost',
-      rows: ['0011111100', '0111111110', '1111111111', '1101101111', '1111111011', '1111111111', '1111111111', '1101101101', '1001001001', '0000000000'],
-    },
+    { id: 'crown15', nameRu: 'Корона', nameEn: 'Crown', draw: 'crown' },
+    { id: 'castle15', nameRu: 'Замок', nameEn: 'Castle', draw: 'castle' },
+    { id: 'owl15', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
+    { id: 'turtle15', nameRu: 'Черепаха', nameEn: 'Turtle', draw: 'turtle' },
+    { id: 'ship15', nameRu: 'Корабль', nameEn: 'Ship', draw: 'ship' },
+    { id: 'robot15', nameRu: 'Робот', nameEn: 'Robot', draw: 'robot' },
+    { id: 'anchor15', nameRu: 'Якорь', nameEn: 'Anchor', draw: 'anchor' },
+    { id: 'butterfly15', nameRu: 'Бабочка', nameEn: 'Butterfly', draw: 'butterfly' },
   ],
-  expert: [
-    {
-      nameRu: 'Сова',
-      nameEn: 'Owl',
-      rows: ['001111111100', '011111111110', '111001100111', '110001100011', '111111111111', '111101101111', '011111111110', '001111111100', '000111111000', '001110011100', '011100001110', '110000000011'],
-    },
-    {
-      nameRu: 'Корона',
-      nameEn: 'Crown',
-      rows: ['100000000001', '110000000011', '111000000111', '101100001101', '100110011001', '100011110001', '111111111111', '011111111110', '001111111100', '001111111100', '000111111000', '000000000000'],
-    },
-    {
-      nameRu: 'Замок',
-      nameEn: 'Castle',
-      rows: ['101001100101', '111111111111', '111111111111', '011111111110', '011111111110', '011011110110', '011011110110', '011111111110', '011100001110', '011100001110', '111100001111', '111111111111'],
-    },
-    {
-      nameRu: 'Черепаха',
-      nameEn: 'Turtle',
-      rows: ['000011110000', '001111111100', '011111111110', '111111111111', '110110110011', '111111111111', '011111111110', '001111111100', '010011110010', '100001100001', '000001100000', '000000000000'],
-    },
+  epic: [
+    { id: 'dragon20', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
+    { id: 'skull20', nameRu: 'Череп', nameEn: 'Skull', draw: 'skull' },
+    { id: 'castle20', nameRu: 'Большой замок', nameEn: 'Big Castle', draw: 'castle' },
+    { id: 'owl20', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
+    { id: 'cactus20', nameRu: 'Кактус', nameEn: 'Cactus', draw: 'cactus' },
+    { id: 'spaceship20', nameRu: 'Космолёт', nameEn: 'Spaceship', draw: 'spaceship' },
+    { id: 'butterfly20', nameRu: 'Бабочка', nameEn: 'Butterfly', draw: 'butterfly' },
+    { id: 'trophy20', nameRu: 'Кубок', nameEn: 'Trophy', draw: 'trophy' },
+  ],
+  abyss: [
+    { id: 'dragon30', nameRu: 'Большой дракон', nameEn: 'Big Dragon', draw: 'dragon' },
+    { id: 'castle30', nameRu: 'Крепость', nameEn: 'Fortress', draw: 'castle' },
+    { id: 'spaceship30', nameRu: 'Звездолёт', nameEn: 'Starship', draw: 'spaceship' },
+    { id: 'owl30', nameRu: 'Мудрая сова', nameEn: 'Wise Owl', draw: 'owl' },
+    { id: 'skull30', nameRu: 'Пиратский череп', nameEn: 'Pirate Skull', draw: 'skull' },
+    { id: 'ship30', nameRu: 'Парусник', nameEn: 'Sailboat', draw: 'ship' },
+    { id: 'robot30', nameRu: 'Большой робот', nameEn: 'Big Robot', draw: 'robot' },
+    { id: 'phoenix30', nameRu: 'Феникс', nameEn: 'Phoenix', draw: 'phoenix' },
   ],
 };
 
 const I18N = {
   ru: {
     title: 'Нонограммы Код Рисунка',
-    subtitle: 'Логическая головоломка в стиле японских кроссвордов для Яндекс Игр.',
+    subtitle: 'Раскрашивай клетки по числам слева и сверху. Без системного скролла, с быстрым управлением на телефоне.',
     theme: 'Тема',
     dark: 'Тёмная',
     light: 'Светлая',
@@ -126,31 +96,31 @@ const I18N = {
     lives: 'Жизни',
     mistakes: 'Ошибки',
     freeMode: 'Свободный режим',
-    freeModeMetaLocked: 'Откроется после 5 побед',
-    freeModeMetaOpen: 'Без жизней: ошибки считаются при проверке',
+    freeModeMetaLocked: 'Откроется после 5 побед на уровне',
+    freeModeMetaOpen: 'Без жизней: ошибки видны при проверке',
     locked: 'Закрыт',
     enabled: 'Вкл',
     newGame: 'Новая игра',
     pause: 'Пауза',
     resume: 'Продолжить',
-    erase: 'Стереть клетку',
-    clearCrosses: 'Очистить крестики',
+    gallery: 'Галерея',
     hint: 'Подсказка',
     check: 'Проверить',
     surrender: 'Сдаться',
     paint: 'Закрасить',
     cross: 'Крестик',
-    boardSub: 'Раскрась клетки по числам слева и сверху.',
-    hintFree: '1-я подсказка бесплатно',
-    hintPaid: 'Подсказка: 20 монет',
+    boardSub: 'Числа показывают подряд идущие группы закрашенных клеток.',
+    cellsLeft: (n) => `Осталось закрасить: ${n}`,
+    hintStateFree: 'Подсказка: бесплатно',
+    hintStatePaid: 'Подсказка: 20 монет',
     wins: 'Побед',
-    needUnlock: 'Закрыто',
-    opensAfter: 'Откроется после побед на предыдущем уровне',
+    opensAfter: 'Откроется после 5 побед на предыдущем уровне',
     progressShort: (wins) => `${Math.min(wins, WIN_TARGET)}/${WIN_TARGET}`,
-    rule1: 'Числа показывают группы закрашенных клеток в строке или столбце.',
-    rule2: 'Между двумя группами всегда есть хотя бы одна пустая клетка.',
-    rule3: 'В обычном режиме неверная закраска снимает жизнь. Крестики можно ставить без штрафа.',
-    rule4: 'В свободном режиме жизней нет: заполни рисунок и нажми «Проверить».',
+    rule1: 'Каждое число — длина группы закрашенных клеток в строке или столбце.',
+    rule2: 'Между двумя группами всегда есть минимум одна пустая клетка.',
+    rule3: 'Нажатие по клетке ставит выбранный инструмент. Повторное нажатие стирает эту же отметку.',
+    rule4: 'Можно зажать палец или мышь и вести по полю: клетки будут ставиться сразу пачкой.',
+    rule5: 'В разминке часть пустых клеток заранее отмечена крестиками. Это учебный режим.',
     close: 'Закрыть',
     pauseTitle: 'Пауза',
     pauseText: 'Игра остановлена. Менять сложность и начинать новую игру во время паузы нельзя.',
@@ -160,22 +130,23 @@ const I18N = {
     buyLife: 'Продолжить за 50 монет',
     restart: 'Рестарт',
     winTitle: 'Рисунок открыт',
-    winText: (reward) => `Победа засчитана. Награда: ${reward} монет.`,
+    winText: (name, reward) => `Это «${name}». Победа засчитана, награда: ${reward} монет.`,
     nextLevel: 'Следующий уровень',
     playAgain: 'Играть снова',
-    surrenderTitle: 'Ты сдался',
-    surrenderText: 'Решение раскрыто полностью. Можно изучить рисунок и начать новую партию.',
+    surrenderTitle: 'Решение раскрыто',
+    surrenderText: (name) => `Это «${name}». Можно рассмотреть картинку и начать новую партию.`,
     notEnoughCoins: 'Не хватает монет.',
-    noSelected: 'Сначала выбери клетку.',
     noHints: 'Все нужные клетки уже открыты.',
     wrongCell: 'Эта клетка должна быть пустой.',
     solved: 'Готово. Рисунок совпадает с подсказками.',
     notSolved: (n) => `Пока не сходится. Нужно исправить: ${n}.`,
     freeLockedMessage: (title) => `Свободный режим для «${title}» откроется после 5 побед.`,
+    galleryTitle: 'Готовые картинки',
+    galleryText: 'Здесь можно посмотреть силуэты и названия рисунков. В игре они не раскрывают текущую партию автоматически.',
   },
   en: {
     title: 'Nonograms Code Picture',
-    subtitle: 'A Japanese crossword-style logic puzzle for Yandex Games.',
+    subtitle: 'Fill cells using row and column clues. Fast mobile controls, no system scroll.',
     theme: 'Theme',
     dark: 'Dark',
     light: 'Light',
@@ -188,31 +159,31 @@ const I18N = {
     lives: 'Lives',
     mistakes: 'Errors',
     freeMode: 'Free mode',
-    freeModeMetaLocked: 'Unlocks after 5 wins',
-    freeModeMetaOpen: 'No lives: errors are counted on check',
+    freeModeMetaLocked: 'Unlocks after 5 wins on this level',
+    freeModeMetaOpen: 'No lives: errors show on check',
     locked: 'Locked',
     enabled: 'On',
     newGame: 'New game',
     pause: 'Pause',
     resume: 'Resume',
-    erase: 'Erase cell',
-    clearCrosses: 'Clear crosses',
+    gallery: 'Gallery',
     hint: 'Hint',
     check: 'Check',
     surrender: 'Give up',
     paint: 'Paint',
     cross: 'Cross',
-    boardSub: 'Fill cells using the numbers on the left and above.',
-    hintFree: '1st hint is free',
-    hintPaid: 'Hint: 20 coins',
+    boardSub: 'Numbers show consecutive groups of filled cells.',
+    cellsLeft: (n) => `Cells left: ${n}`,
+    hintStateFree: 'Hint: free',
+    hintStatePaid: 'Hint: 20 coins',
     wins: 'Wins',
-    needUnlock: 'Locked',
-    opensAfter: 'Unlocks after wins on the previous level',
+    opensAfter: 'Unlocks after 5 wins on the previous level',
     progressShort: (wins) => `${Math.min(wins, WIN_TARGET)}/${WIN_TARGET}`,
-    rule1: 'Numbers show groups of filled cells in a row or column.',
-    rule2: 'There is always at least one empty cell between two groups.',
-    rule3: 'In normal mode, a wrong filled cell costs one life. Crosses are safe.',
-    rule4: 'In free mode there are no lives: complete the picture and press Check.',
+    rule1: 'Each number is the length of a filled group in a row or column.',
+    rule2: 'There is at least one empty cell between two groups.',
+    rule3: 'Tap a cell to use the selected tool. Tap again to erase the same mark.',
+    rule4: 'Hold and drag to paint or cross several cells at once.',
+    rule5: 'Warm-up starts with several empty cells already crossed as a learning aid.',
     close: 'Close',
     pauseTitle: 'Paused',
     pauseText: 'The game is stopped. Difficulty and new game buttons are blocked while paused.',
@@ -222,18 +193,19 @@ const I18N = {
     buyLife: 'Continue for 50 coins',
     restart: 'Restart',
     winTitle: 'Picture solved',
-    winText: (reward) => `Win recorded. Reward: ${reward} coins.`,
+    winText: (name, reward) => `This is “${name}”. Win recorded, reward: ${reward} coins.`,
     nextLevel: 'Next level',
     playAgain: 'Play again',
-    surrenderTitle: 'You gave up',
-    surrenderText: 'The full solution is shown. Study it and start another game.',
+    surrenderTitle: 'Solution revealed',
+    surrenderText: (name) => `This is “${name}”. Study the picture and start another round.`,
     notEnoughCoins: 'Not enough coins.',
-    noSelected: 'Select a cell first.',
     noHints: 'All filled cells are already revealed.',
     wrongCell: 'This cell must stay empty.',
     solved: 'Done. The picture matches the clues.',
     notSolved: (n) => `Not solved yet. Fix cells: ${n}.`,
     freeLockedMessage: (title) => `Free mode for “${title}” unlocks after 5 wins.`,
+    galleryTitle: 'Finished pictures',
+    galleryText: 'Preview silhouettes and names. The current puzzle is not automatically revealed during play.',
   },
 };
 
@@ -263,6 +235,217 @@ function rowsToMatrix(rows) {
   return rows.map((row) => row.split('').map((cell) => cell === '1'));
 }
 
+function makeMatrix(size, predicate) {
+  return Array.from({ length: size }, (_, r) => (
+    Array.from({ length: size }, (_, c) => Boolean(predicate(r, c, size)))
+  ));
+}
+
+function normCoord(index, size) {
+  if (size <= 1) return 0;
+  return (index / (size - 1)) * 2 - 1;
+}
+
+function drawByName(name, size) {
+  const x = (c) => normCoord(c, size);
+  const y = (r) => normCoord(r, size);
+  const abs = Math.abs;
+  const round = Math.round;
+  const mid = (size - 1) / 2;
+
+  const drawers = {
+    diamond: () => makeMatrix(size, (r, c) => abs(x(c)) + abs(y(r)) < 0.82),
+    flower: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const d1 = (nx * nx) / 0.28 + ((ny - 0.36) * (ny - 0.36)) / 0.13 < 1;
+      const d2 = (nx * nx) / 0.28 + ((ny + 0.36) * (ny + 0.36)) / 0.13 < 1;
+      const d3 = ((nx - 0.36) * (nx - 0.36)) / 0.13 + (ny * ny) / 0.28 < 1;
+      const d4 = ((nx + 0.36) * (nx + 0.36)) / 0.13 + (ny * ny) / 0.28 < 1;
+      const center = nx * nx + ny * ny < 0.12;
+      const stem = abs(nx) < 0.08 && ny > 0.35;
+      return d1 || d2 || d3 || d4 || center || stem;
+    }),
+    cat: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const head = (nx * nx) / 0.72 + ((ny + 0.02) * (ny + 0.02)) / 0.62 < 1;
+      const ears = (ny < -0.45 && abs(nx) > 0.34 && abs(nx) < 0.78 && ny > -1 + abs(abs(nx) - 0.56) * 1.4);
+      const eyes = ny > -0.16 && ny < 0.08 && (abs(nx + 0.28) < 0.08 || abs(nx - 0.28) < 0.08);
+      const mouth = ny > 0.34 && abs(nx) < 0.2;
+      return (head || ears) && !eyes && !mouth;
+    }),
+    rocket: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = abs(nx) < 0.28 && ny > -0.62 && ny < 0.62;
+      const nose = ny < -0.45 && abs(nx) < (ny + 0.92) * 0.62;
+      const fins = ny > 0.42 && abs(nx) > 0.18 && abs(nx) < 0.55 && ny < 0.85;
+      const flame = ny > 0.64 && abs(nx) < 0.18 + (ny - 0.64) * 0.28;
+      return body || nose || fins || flame;
+    }),
+    fish: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = ((nx + 0.15) * (nx + 0.15)) / 0.58 + (ny * ny) / 0.38 < 1;
+      const tail = nx > 0.45 && abs(ny) < (nx - 0.35) * 1.25 && nx < 0.98;
+      const eye = nx < -0.42 && nx > -0.58 && abs(ny + 0.16) < 0.1;
+      return (body || tail) && !eye;
+    }),
+    key: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const ring = (nx + 0.45) * (nx + 0.45) + (ny + 0.12) * (ny + 0.12) < 0.20 && (nx + 0.45) * (nx + 0.45) + (ny + 0.12) * (ny + 0.12) > 0.055;
+      const shaft = abs(ny + 0.12) < 0.09 && nx > -0.28 && nx < 0.72;
+      const tooth1 = nx > 0.35 && nx < 0.48 && ny > -0.12 && ny < 0.34;
+      const tooth2 = nx > 0.58 && nx < 0.72 && ny > -0.12 && ny < 0.22;
+      return ring || shaft || tooth1 || tooth2;
+    }),
+    tree: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const crown1 = ny < -0.28 && ny > -0.92 && abs(nx) < (ny + 1.05) * 0.78;
+      const crown2 = ny < 0.18 && ny > -0.42 && abs(nx) < (ny + 0.62) * 0.72;
+      const trunk = abs(nx) < 0.14 && ny > 0.16 && ny < 0.78;
+      const base = ny > 0.68 && ny < 0.86 && abs(nx) < 0.38;
+      return crown1 || crown2 || trunk || base;
+    }),
+    ghost: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = ny > -0.56 && ny < 0.72 && abs(nx) < 0.62;
+      const dome = (nx * nx) / 0.39 + ((ny + 0.54) * (ny + 0.54)) / 0.32 < 1;
+      const waves = ny > 0.58 && (Math.floor((c / size) * 5) % 2 === 0);
+      const eyes = ny > -0.34 && ny < -0.08 && (abs(nx + 0.26) < 0.08 || abs(nx - 0.26) < 0.08);
+      return (body || dome || waves) && !eyes;
+    }),
+    crown: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const base = ny > 0.22 && ny < 0.76 && abs(nx) < 0.78;
+      const points = (ny < 0.28 && ny > -0.68) && (
+        abs(nx + 0.62) < (ny + 0.82) * 0.36 ||
+        abs(nx) < (ny + 0.9) * 0.38 ||
+        abs(nx - 0.62) < (ny + 0.82) * 0.36
+      );
+      return base || points;
+    }),
+    castle: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = ny > -0.08 && ny < 0.86 && abs(nx) < 0.78;
+      const leftTower = abs(nx + 0.62) < 0.22 && ny > -0.58 && ny < 0.86;
+      const rightTower = abs(nx - 0.62) < 0.22 && ny > -0.58 && ny < 0.86;
+      const centerTower = abs(nx) < 0.22 && ny > -0.76 && ny < 0.86;
+      const battlement = ny < -0.52 && (Math.floor(c / Math.max(1, size / 7)) % 2 === 0);
+      const gate = ny > 0.45 && abs(nx) < 0.16;
+      return (body || leftTower || rightTower || centerTower || battlement) && !gate;
+    }),
+    owl: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = (nx * nx) / 0.62 + ((ny - 0.05) * (ny - 0.05)) / 0.86 < 1;
+      const ears = ny < -0.5 && abs(nx) > 0.34 && abs(nx) < 0.78 && ny > -1 + abs(abs(nx) - 0.56);
+      const eyes = ny > -0.34 && ny < -0.06 && (abs(nx + 0.27) < 0.12 || abs(nx - 0.27) < 0.12);
+      const belly = ny > 0.22 && ny < 0.48 && abs(nx) < 0.22;
+      const feet = ny > 0.78 && (abs(nx + 0.2) < 0.15 || abs(nx - 0.2) < 0.15);
+      return (body || ears || feet) && !eyes && !belly;
+    }),
+    turtle: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const shell = (nx * nx) / 0.62 + (ny * ny) / 0.36 < 1;
+      const head = ((nx - 0.72) * (nx - 0.72)) / 0.08 + (ny * ny) / 0.08 < 1;
+      const legs = ny > 0.28 && (abs(nx + 0.45) < 0.12 || abs(nx - 0.45) < 0.12);
+      const tail = nx < -0.75 && abs(ny) < 0.12;
+      return shell || head || legs || tail;
+    }),
+    ship: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const mast = abs(nx) < 0.04 && ny > -0.78 && ny < 0.36;
+      const sail1 = nx > 0.04 && nx < 0.65 && ny > -0.72 && ny < 0.2 && nx < (ny + 0.85) * 0.85;
+      const sail2 = nx < -0.04 && nx > -0.5 && ny > -0.48 && ny < 0.16 && abs(nx) < (ny + 0.64) * 0.7;
+      const hull = ny > 0.36 && ny < 0.68 && abs(nx) < 0.76 - (ny - 0.36) * 0.65;
+      return mast || sail1 || sail2 || hull;
+    }),
+    robot: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const head = abs(nx) < 0.52 && ny > -0.82 && ny < -0.25;
+      const body = abs(nx) < 0.64 && ny > -0.12 && ny < 0.55;
+      const arms = ny > -0.03 && ny < 0.38 && abs(nx) > 0.64 && abs(nx) < 0.86;
+      const legs = ny > 0.55 && ny < 0.88 && (abs(nx + 0.25) < 0.14 || abs(nx - 0.25) < 0.14);
+      const antenna = abs(nx) < 0.05 && ny < -0.82;
+      const eyes = ny > -0.62 && ny < -0.46 && (abs(nx + 0.24) < 0.08 || abs(nx - 0.24) < 0.08);
+      return (head || body || arms || legs || antenna) && !eyes;
+    }),
+    anchor: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const shaft = abs(nx) < 0.08 && ny > -0.72 && ny < 0.42;
+      const ring = nx * nx + ((ny + 0.76) * (ny + 0.76)) < 0.08 && nx * nx + ((ny + 0.76) * (ny + 0.76)) > 0.025;
+      const cross = abs(ny + 0.2) < 0.06 && abs(nx) < 0.48;
+      const curve = ny > 0.24 && ny < 0.78 && abs(abs(nx) - 0.42) < (ny - 0.18) * 0.22;
+      const hooks = ny > 0.55 && abs(nx) > 0.35 && abs(nx) < 0.72;
+      return shaft || ring || cross || curve || hooks;
+    }),
+    butterfly: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = abs(nx) < 0.08 && abs(ny) < 0.78;
+      const upper = ((abs(nx) - 0.36) ** 2) / 0.18 + ((ny + 0.28) ** 2) / 0.24 < 1;
+      const lower = ((abs(nx) - 0.32) ** 2) / 0.16 + ((ny - 0.38) ** 2) / 0.2 < 1;
+      const holes = ((abs(nx) - 0.34) ** 2) / 0.035 + ((ny + 0.25) ** 2) / 0.045 < 1;
+      return (body || upper || lower) && !holes;
+    }),
+    skull: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const head = (nx * nx) / 0.54 + ((ny + 0.24) * (ny + 0.24)) / 0.62 < 1;
+      const jaw = abs(nx) < 0.42 && ny > 0.16 && ny < 0.72;
+      const eyes = ny > -0.28 && ny < 0.03 && (abs(nx + 0.25) < 0.13 || abs(nx - 0.25) < 0.13);
+      const nose = ny > 0.08 && ny < 0.28 && abs(nx) < 0.1;
+      const teeth = ny > 0.53 && ny < 0.72 && Math.floor((nx + 0.42) * 8) % 2 === 0;
+      return (head || jaw) && !eyes && !nose && !teeth;
+    }),
+    cactus: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const trunk = abs(nx) < 0.16 && ny > -0.74 && ny < 0.82;
+      const leftArm = nx < -0.16 && nx > -0.58 && ny > -0.2 && ny < 0.04;
+      const leftUp = abs(nx + 0.58) < 0.13 && ny > -0.48 && ny < 0.05;
+      const rightArm = nx > 0.16 && nx < 0.58 && ny > -0.42 && ny < -0.18;
+      const rightUp = abs(nx - 0.58) < 0.13 && ny > -0.64 && ny < -0.18;
+      const base = ny > 0.78 && abs(nx) < 0.36;
+      return trunk || leftArm || leftUp || rightArm || rightUp || base;
+    }),
+    spaceship: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = (nx * nx) / 0.92 + (ny * ny) / 0.24 < 1;
+      const dome = (nx * nx) / 0.28 + ((ny + 0.22) * (ny + 0.22)) / 0.18 < 1 && ny < 0.08;
+      const beams = ny > 0.25 && ny < 0.78 && (abs(nx) < 0.08 || abs(nx + 0.36) < 0.06 || abs(nx - 0.36) < 0.06);
+      return body || dome || beams;
+    }),
+    trophy: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const cup = abs(nx) < 0.48 - Math.max(0, ny + 0.28) * 0.2 && ny > -0.72 && ny < 0.2;
+      const handles = ny > -0.52 && ny < -0.08 && abs(abs(nx) - 0.58) < 0.1;
+      const stem = abs(nx) < 0.12 && ny > 0.16 && ny < 0.58;
+      const base = abs(nx) < 0.48 && ny > 0.58 && ny < 0.78;
+      return cup || handles || stem || base;
+    }),
+    dragon: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = ((nx + 0.15) * (nx + 0.15)) / 0.52 + ((ny - 0.18) * (ny - 0.18)) / 0.30 < 1;
+      const neck = abs(nx - 0.28) < 0.13 && ny > -0.42 && ny < 0.1;
+      const head = ((nx - 0.48) * (nx - 0.48)) / 0.16 + ((ny + 0.5) * (ny + 0.5)) / 0.12 < 1;
+      const wing = nx < 0.05 && nx > -0.72 && ny < -0.08 && ny > -0.68 && abs(ny + 0.08) < (-nx + 0.12) * 0.75;
+      const tail = nx < -0.42 && ny > 0.05 && ny < 0.26 + (-nx - 0.42) * 0.7;
+      const leg = ny > 0.42 && (abs(nx + 0.14) < 0.09 || abs(nx - 0.32) < 0.08);
+      return body || neck || head || wing || tail || leg;
+    }),
+    phoenix: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = abs(nx) < 0.16 && ny > -0.35 && ny < 0.55;
+      const wings = ny > -0.55 && ny < 0.2 && abs(nx) > 0.12 && abs(nx) < 0.86 && abs(ny + 0.08) < (0.95 - abs(nx)) * 0.55;
+      const head = nx * nx + ((ny + 0.58) * (ny + 0.58)) < 0.08;
+      const tail = ny > 0.45 && abs(nx) < 0.12 + (ny - 0.45) * 0.9;
+      return body || wings || head || tail;
+    }),
+  };
+
+  return (drawers[name] || drawers.diamond)();
+}
+
+function getSolution(puzzle, size) {
+  if (puzzle.rows) return rowsToMatrix(puzzle.rows);
+  return drawByName(puzzle.draw, size);
+}
+
 function buildClue(line) {
   const result = [];
   let count = 0;
@@ -289,6 +472,30 @@ function buildClues(solution) {
 
 function makeEmptyMarks(size) {
   return Array.from({ length: size }, () => Array.from({ length: size }, () => 'empty'));
+}
+
+function starterMarksFor(solution) {
+  const size = solution.length;
+  const marks = makeEmptyMarks(size);
+  const candidates = [];
+
+  for (let r = 0; r < size; r += 1) {
+    for (let c = 0; c < size; c += 1) {
+      if (!solution[r][c]) candidates.push([r, c]);
+    }
+  }
+
+  const limit = Math.min(candidates.length, Math.max(3, Math.round(size * size * 0.16)));
+  candidates
+    .sort(([r1, c1], [r2, c2]) => ((r1 * 17 + c1 * 31) % 101) - ((r2 * 17 + c2 * 31) % 101))
+    .slice(0, limit)
+    .forEach(([r, c]) => { marks[r][c] = 'cross'; });
+
+  return marks;
+}
+
+function revealPictureMarks(solution) {
+  return solution.map((row) => row.map((filled) => (filled ? 'filled' : 'empty')));
 }
 
 function revealSolutionMarks(solution) {
@@ -331,7 +538,7 @@ function classNames(...items) {
 }
 
 function isDifficultyUnlocked(index, progress) {
-  if (index === 0) return true;
+  if (index <= 1) return true;
   const prev = DIFFICULTIES[index - 1];
   return (progress[prev.id] || 0) >= WIN_TARGET;
 }
@@ -350,6 +557,10 @@ function pickPuzzle(diffId, exceptIndex = -1) {
   return { puzzle: list[index], index };
 }
 
+function getPuzzleName(puzzle, lang) {
+  return lang === 'ru' ? puzzle.nameRu : puzzle.nameEn;
+}
+
 function installInteractionGuards(suppressClickRef) {
   const scrollHost = document.querySelector('.app') || document.scrollingElement || document.documentElement;
   let startX = 0;
@@ -358,7 +569,7 @@ function installInteractionGuards(suppressClickRef) {
   let isTracking = false;
   let didScroll = false;
 
-  const shouldIgnoreTarget = (target) => !!target.closest?.('.modal, .overlay, input, textarea, select');
+  const shouldIgnoreTarget = (target) => !!target.closest?.('.modal, .overlay, input, textarea, select, button, .nonogram-stage, .gallery-grid');
 
   const startTracking = (event) => {
     if (event.touches.length !== 1 || shouldIgnoreTarget(event.target)) {
@@ -390,15 +601,13 @@ function installInteractionGuards(suppressClickRef) {
     lastY = touch.clientY;
     scrollHost.scrollTop += deltaY;
     didScroll = true;
-    suppressClickRef.current = Date.now() + 450;
+    suppressClickRef.current = Date.now() + 220;
 
-    if (event.cancelable) {
-      event.preventDefault();
-    }
+    if (event.cancelable) event.preventDefault();
   };
 
   const finishTracking = () => {
-    if (didScroll) suppressClickRef.current = Date.now() + 450;
+    if (didScroll) suppressClickRef.current = Date.now() + 220;
     isTracking = false;
     didScroll = false;
   };
@@ -449,6 +658,23 @@ function installInteractionGuards(suppressClickRef) {
   };
 }
 
+
+const INITIAL_PICK = pickPuzzle('warmup');
+
+function Preview({ solution, label, compact = false }) {
+  const size = solution.length;
+  return (
+    <div className={classNames('picture-preview', compact && 'compact-preview')}>
+      <div className="preview-grid" style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}>
+        {solution.map((row, r) => row.map((filled, c) => (
+          <span key={`${r}-${c}`} className={filled ? 'preview-cell on' : 'preview-cell'} />
+        )))}
+      </div>
+      {label && <div className="preview-label">{label}</div>}
+    </div>
+  );
+}
+
 export default function App() {
   const initialProgress = useMemo(() => getLocalJson(STORAGE_KEYS.progress, {}), []);
   const [hydrated, setHydrated] = useState(false);
@@ -457,8 +683,8 @@ export default function App() {
   const [coins, setCoins] = useState(() => Number(localStorage.getItem(STORAGE_KEYS.coins) || START_COINS));
   const [progress, setProgress] = useState(initialProgress);
   const [difficultyIndex, setDifficultyIndex] = useState(0);
-  const [puzzleIndex, setPuzzleIndex] = useState(() => pickPuzzle('easy').index);
-  const [marks, setMarks] = useState(() => makeEmptyMarks(DIFFICULTIES[0].size));
+  const [puzzleIndex, setPuzzleIndex] = useState(() => INITIAL_PICK.index);
+  const [marks, setMarks] = useState(() => starterMarksFor(getSolution(INITIAL_PICK.puzzle, DIFFICULTIES[0].size)));
   const [tool, setTool] = useState('fill');
   const [selectedCell, setSelectedCell] = useState(null);
   const [lives, setLives] = useState(DIFFICULTIES[0].lives);
@@ -470,20 +696,26 @@ export default function App() {
   const [notification, setNotification] = useState('');
   const [hintUsed, setHintUsed] = useState(false);
   const [cellSize, setCellSize] = useState(38);
+  const [clueWidth, setClueWidth] = useState(96);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const stageRef = useRef(null);
   const suppressClickRef = useRef(0);
   const saveTimerRef = useRef(null);
   const notificationTimerRef = useRef(null);
+  const dragRef = useRef({ active: false, target: 'filled', pointerId: null, touched: new Set() });
+  const winLockRef = useRef(false);
 
   const t = I18N[lang];
   const difficulty = DIFFICULTIES[difficultyIndex];
   const puzzle = PUZZLES[difficulty.id][puzzleIndex] || PUZZLES[difficulty.id][0];
-  const solution = useMemo(() => rowsToMatrix(puzzle.rows), [puzzle]);
+  const puzzleName = getPuzzleName(puzzle, lang);
+  const solution = useMemo(() => getSolution(puzzle, difficulty.size), [puzzle, difficulty.size]);
   const { rowClues, colClues } = useMemo(() => buildClues(solution), [solution]);
   const remaining = useMemo(() => countRemaining(marks, solution), [marks, solution]);
   const mistakeCount = useMemo(() => countErrors(marks, solution), [marks, solution]);
   const timeText = formatTime(elapsed);
+  const freeUnlocked = isFreeModeUnlocked(difficulty.id, progress);
 
   const showNotification = useCallback((text) => {
     setNotification(text);
@@ -515,10 +747,12 @@ export default function App() {
     const picked = keepPuzzleIndex
       ? { index: puzzleIndex }
       : pickPuzzle(nextDifficulty.id, nextDifficultyIndex === difficultyIndex ? puzzleIndex : -1);
+    const nextPuzzle = PUZZLES[nextDifficulty.id][picked.index] || PUZZLES[nextDifficulty.id][0];
+    const nextSolution = getSolution(nextPuzzle, nextDifficulty.size);
 
     setDifficultyIndex(nextDifficultyIndex);
     setPuzzleIndex(picked.index);
-    setMarks(makeEmptyMarks(nextDifficulty.size));
+    setMarks(nextDifficulty.starterCrosses ? starterMarksFor(nextSolution) : makeEmptyMarks(nextDifficulty.size));
     setLives(nextDifficulty.lives);
     setSelectedCell(null);
     setElapsed(0);
@@ -526,6 +760,9 @@ export default function App() {
     setIsPaused(false);
     setModal(null);
     setHintUsed(false);
+    setIsCompleting(false);
+    winLockRef.current = false;
+    dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set() };
   }, [difficultyIndex, puzzleIndex]);
 
   const stopGameplay = useCallback(() => {
@@ -540,9 +777,12 @@ export default function App() {
   }, []);
 
   const finishWin = useCallback(() => {
+    if (winLockRef.current) return;
+    winLockRef.current = true;
+    setIsCompleting(true);
     stopGameplay();
     setTimerActive(false);
-    setModal('win');
+    setMarks(revealPictureMarks(solution));
 
     setProgress((prev) => {
       const next = { ...prev, [difficulty.id]: (prev[difficulty.id] || 0) + 1 };
@@ -553,19 +793,23 @@ export default function App() {
       });
       return next;
     });
-  }, [difficulty.id, difficulty.reward, stopGameplay, syncSave]);
+
+    window.setTimeout(() => {
+      setModal('win');
+    }, 950);
+  }, [difficulty.id, difficulty.reward, solution, stopGameplay, syncSave]);
 
   const checkWinAfterMove = useCallback((nextMarks) => {
     if (isSolved(nextMarks, solution)) {
-      window.setTimeout(finishWin, 80);
+      window.setTimeout(finishWin, 40);
       return true;
     }
     return false;
   }, [finishWin, solution]);
 
-  const handleCell = useCallback((row, col) => {
+  const applyCell = useCallback((row, col, targetOverride = null) => {
     if (Date.now() < suppressClickRef.current) return;
-    if (isPaused || modal || lives <= 0) return;
+    if (isPaused || modal || lives <= 0 || isCompleting) return;
 
     setSelectedCell({ row, col });
     startGameplay();
@@ -573,9 +817,17 @@ export default function App() {
     setMarks((prev) => {
       const next = prev.map((line) => [...line]);
       const current = next[row][col];
+      const target = targetOverride || (tool === 'cross'
+        ? (current === 'cross' ? 'empty' : 'cross')
+        : (current === 'filled' ? 'empty' : 'filled'));
 
-      if (tool === 'cross') {
-        next[row][col] = current === 'cross' ? 'empty' : 'cross';
+      if (target === 'empty') {
+        next[row][col] = 'empty';
+        return next;
+      }
+
+      if (target === 'cross') {
+        next[row][col] = 'cross';
         return next;
       }
 
@@ -594,32 +846,40 @@ export default function App() {
         return next;
       }
 
-      next[row][col] = current === 'filled' ? 'empty' : 'filled';
+      next[row][col] = 'filled';
       checkWinAfterMove(next);
       return next;
     });
-  }, [checkWinAfterMove, freeMode, isPaused, lives, modal, showNotification, solution, startGameplay, stopGameplay, t.wrongCell, tool]);
+  }, [checkWinAfterMove, freeMode, isCompleting, isPaused, lives, modal, showNotification, solution, startGameplay, stopGameplay, t.wrongCell, tool]);
 
-  const eraseSelected = useCallback(() => {
-    if (isPaused || modal) return;
-    if (!selectedCell) {
-      showNotification(t.noSelected);
-      return;
-    }
-    setMarks((prev) => {
-      const next = prev.map((line) => [...line]);
-      next[selectedCell.row][selectedCell.col] = 'empty';
-      return next;
-    });
-  }, [isPaused, modal, selectedCell, showNotification, t.noSelected]);
+  const handlePointerDown = useCallback((event, row, col, currentMark) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
 
-  const clearCrosses = useCallback(() => {
-    if (isPaused || modal) return;
-    setMarks((prev) => prev.map((row) => row.map((cell) => (cell === 'cross' ? 'empty' : cell))));
-  }, [isPaused, modal]);
+    const target = tool === 'cross'
+      ? (currentMark === 'cross' ? 'empty' : 'cross')
+      : (currentMark === 'filled' ? 'empty' : 'filled');
+
+    dragRef.current = { active: true, target, pointerId: event.pointerId, touched: new Set([`${row}:${col}`]) };
+    applyCell(row, col, target);
+  }, [applyCell, tool]);
+
+  const handlePointerEnter = useCallback((event, row, col) => {
+    const drag = dragRef.current;
+    if (!drag.active || drag.pointerId !== event.pointerId) return;
+    const key = `${row}:${col}`;
+    if (drag.touched.has(key)) return;
+    drag.touched.add(key);
+    applyCell(row, col, drag.target);
+  }, [applyCell]);
+
+  const handlePointerUp = useCallback(() => {
+    dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set() };
+  }, []);
 
   const useHint = useCallback(() => {
-    if (isPaused || modal) return;
+    if (isPaused || modal || isCompleting) return;
 
     const hidden = [];
     solution.forEach((row, r) => {
@@ -650,10 +910,10 @@ export default function App() {
       return next;
     });
     syncSave({ coins: nextCoins });
-  }, [checkWinAfterMove, coins, hintUsed, isPaused, marks, modal, showNotification, solution, startGameplay, syncSave, t.noHints, t.notEnoughCoins]);
+  }, [checkWinAfterMove, coins, hintUsed, isCompleting, isPaused, marks, modal, showNotification, solution, startGameplay, syncSave, t.noHints, t.notEnoughCoins]);
 
   const checkPuzzle = useCallback(() => {
-    if (isPaused || modal) return;
+    if (isPaused || modal || isCompleting) return;
     startGameplay();
     const errors = countErrors(marks, solution);
     if (errors === 0) {
@@ -662,15 +922,15 @@ export default function App() {
     } else {
       showNotification(t.notSolved(errors));
     }
-  }, [finishWin, isPaused, marks, modal, showNotification, solution, startGameplay, t]);
+  }, [finishWin, isCompleting, isPaused, marks, modal, showNotification, solution, startGameplay, t]);
 
   const surrender = useCallback(() => {
-    if (isPaused || modal) return;
+    if (isPaused || modal || isCompleting) return;
     stopGameplay();
     setTimerActive(false);
     setMarks(revealSolutionMarks(solution));
     setModal('surrender');
-  }, [isPaused, modal, solution, stopGameplay]);
+  }, [isCompleting, isPaused, modal, solution, stopGameplay]);
 
   const togglePause = useCallback(() => {
     if (modal && modal !== 'pause') return;
@@ -689,22 +949,22 @@ export default function App() {
   }, [modal, stopGameplay, timerActive]);
 
   const toggleFreeMode = useCallback(() => {
-    if (isPaused || modal) return;
+    if (isPaused || modal || isCompleting) return;
     if (!isFreeModeUnlocked(difficulty.id, progress)) {
       showNotification(t.freeLockedMessage(lang === 'ru' ? difficulty.ru : difficulty.en));
       return;
     }
     setFreeMode((value) => !value);
     resetGame(difficultyIndex, true);
-  }, [difficulty, difficultyIndex, isPaused, lang, modal, progress, resetGame, showNotification, t]);
+  }, [difficulty, difficultyIndex, isCompleting, isPaused, lang, modal, progress, resetGame, showNotification, t]);
 
   const selectDifficulty = useCallback((index) => {
-    if (isPaused || modal) return;
+    if (isPaused || modal || isCompleting) return;
     if (!isDifficultyUnlocked(index, progress)) return;
     const nextDifficulty = DIFFICULTIES[index];
     setFreeMode((value) => (value && isFreeModeUnlocked(nextDifficulty.id, progress) ? value : false));
     resetGame(index, false);
-  }, [isPaused, modal, progress, resetGame]);
+  }, [isCompleting, isPaused, modal, progress, resetGame]);
 
   const nextLevel = useCallback(() => {
     const nextIndex = Math.min(difficultyIndex + 1, DIFFICULTIES.length - 1);
@@ -774,6 +1034,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+    };
+  }, [handlePointerUp]);
+
+  useEffect(() => {
     if (!timerActive || isPaused || modal === 'pause') return undefined;
     const id = window.setInterval(() => setElapsed((value) => value + 1), 1000);
     return () => window.clearInterval(id);
@@ -801,11 +1070,13 @@ export default function App() {
       if (!stage) return;
       const rect = stage.getBoundingClientRect();
       const width = rect.width || window.innerWidth;
-      const maxByWidth = Math.floor((width - 92) / difficulty.size);
-      const maxByHeight = Math.floor((window.innerHeight * 0.62 - 72) / difficulty.size);
-      const max = difficulty.size <= 5 ? 56 : difficulty.size <= 7 ? 48 : difficulty.size <= 10 ? 38 : 32;
-      const min = difficulty.size <= 7 ? 32 : 22;
-      setCellSize(Math.max(min, Math.min(max, maxByWidth, maxByHeight)));
+      const size = difficulty.size;
+      const nextClueWidth = size >= 30 ? 50 : size >= 20 ? 58 : size >= 15 ? 68 : size >= 10 ? 82 : 96;
+      const maxByWidth = Math.floor((width - nextClueWidth - 26) / size);
+      const max = size <= 5 ? 56 : size <= 10 ? 38 : size <= 15 ? 28 : size <= 20 ? 23 : 17;
+      const min = size <= 5 ? 34 : size <= 10 ? 24 : size <= 15 ? 17 : size <= 20 ? 13 : 9;
+      setClueWidth(nextClueWidth);
+      setCellSize(Math.max(min, Math.min(max, maxByWidth)));
     };
 
     recalc();
@@ -827,7 +1098,6 @@ export default function App() {
   }, []);
 
   const canGoNext = difficultyIndex < DIFFICULTIES.length - 1 && isDifficultyUnlocked(difficultyIndex + 1, progress);
-  const freeUnlocked = isFreeModeUnlocked(difficulty.id, progress);
 
   if (!hydrated) {
     return (
@@ -922,7 +1192,7 @@ export default function App() {
                       key={diff.id}
                       className={classNames('difficulty-item', index === difficultyIndex && 'active', !unlocked && 'locked', isPaused && 'paused-locked')}
                       type="button"
-                      disabled={!unlocked || isPaused}
+                      disabled={!unlocked || isPaused || isCompleting}
                       onClick={() => selectDifficulty(index)}
                     >
                       <span className="difficulty-main">
@@ -964,7 +1234,7 @@ export default function App() {
               <button
                 className={classNames('mode-switch endless-switch', freeMode && 'active', !freeUnlocked && 'locked')}
                 type="button"
-                disabled={isPaused}
+                disabled={isPaused || isCompleting}
                 onClick={toggleFreeMode}
               >
                 <span className="endless-icon" aria-hidden="true">∞</span>
@@ -979,7 +1249,7 @@ export default function App() {
             <div className="board-head">
               <div className="board-head-main">
                 <div>
-                  <div className="board-title">{lang === 'ru' ? difficulty.ru : difficulty.en} · {puzzle.nameRu && lang === 'ru' ? puzzle.nameRu : puzzle.nameEn} · {difficulty.size}×{difficulty.size}</div>
+                  <div className="board-title">{lang === 'ru' ? difficulty.ru : difficulty.en} · {puzzleName} · {difficulty.size}×{difficulty.size}</div>
                   <div className="board-subtitle">{t.boardSub}</div>
                 </div>
                 <div className="mobile-time-card" aria-hidden="true">
@@ -987,11 +1257,11 @@ export default function App() {
                   <span className="mobile-time-value">{timeText}</span>
                 </div>
               </div>
-              <div className="hint-meta">{hintUsed ? t.hintPaid : t.hintFree} · {remaining}</div>
+              <div className="hint-meta"><span>{t.cellsLeft(remaining)}</span><span>{hintUsed ? t.hintStatePaid : t.hintStateFree}</span></div>
             </div>
 
             <div className="board-wrap nonogram-wrap" ref={stageRef}>
-              <div className="nonogram-stage" style={{ '--cell': `${cellSize}px` }}>
+              <div className="nonogram-stage" style={{ '--cell': `${cellSize}px`, '--clueW': `${clueWidth}px` }}>
                 <div className="clue-corner">▥</div>
                 <div className="col-clues" style={{ gridTemplateColumns: `repeat(${difficulty.size}, var(--cell))` }}>
                   {colClues.map((clue, col) => (
@@ -1020,7 +1290,9 @@ export default function App() {
                         (c + 1) % 5 === 0 && c !== difficulty.size - 1 && 'chunk-right',
                         (r + 1) % 5 === 0 && r !== difficulty.size - 1 && 'chunk-bottom',
                       )}
-                      onClick={() => handleCell(r, c)}
+                      onPointerDown={(event) => handlePointerDown(event, r, c, cell)}
+                      onPointerEnter={(event) => handlePointerEnter(event, r, c)}
+                      onPointerUp={handlePointerUp}
                       aria-label={`cell ${r + 1}-${c + 1}`}
                     />
                   )))}
@@ -1046,14 +1318,13 @@ export default function App() {
                 <span className="side-title-icon" aria-hidden="true">▣</span>
                 <span>{t.actions}</span>
               </div>
-              <div className="actions-list">
-                <button className="tool-btn primary action-btn" type="button" disabled={isPaused} onClick={() => resetGame(difficultyIndex, false)}>{t.newGame}</button>
-                <button className="tool-btn action-btn" type="button" onClick={togglePause}>{isPaused ? t.resume : t.pause}</button>
-                <button className="tool-btn action-btn" type="button" disabled={isPaused} onClick={eraseSelected}>{t.erase}</button>
-                <button className="tool-btn action-btn" type="button" disabled={isPaused} onClick={clearCrosses}>{t.clearCrosses}</button>
-                <button className="tool-btn action-btn" type="button" disabled={isPaused} onClick={useHint}>{t.hint}</button>
-                <button className="tool-btn action-btn" type="button" disabled={isPaused} onClick={checkPuzzle}>{t.check}</button>
-                <button className="tool-btn subtle action-btn" type="button" disabled={isPaused} onClick={surrender}>{t.surrender}</button>
+              <div className="actions-list actions-list-compact">
+                <button className="tool-btn primary action-btn" type="button" disabled={isPaused || isCompleting} onClick={() => resetGame(difficultyIndex, false)}>{t.newGame}</button>
+                <button className="tool-btn action-btn" type="button" disabled={isCompleting} onClick={togglePause}>{isPaused ? t.resume : t.pause}</button>
+                <button className="tool-btn action-btn" type="button" disabled={isPaused || isCompleting} onClick={() => setModal('gallery')}>{t.gallery}</button>
+                <button className="tool-btn action-btn" type="button" disabled={isPaused || isCompleting} onClick={useHint}>{t.hint}</button>
+                <button className="tool-btn action-btn" type="button" disabled={isPaused || isCompleting} onClick={checkPuzzle}>{t.check}</button>
+                <button className="tool-btn subtle action-btn" type="button" disabled={isPaused || isCompleting} onClick={surrender}>{t.surrender}</button>
               </div>
             </div>
           </aside>
@@ -1075,6 +1346,38 @@ export default function App() {
               <div className="rule-item">{t.rule2}</div>
               <div className="rule-item">{t.rule3}</div>
               <div className="rule-item">{t.rule4}</div>
+              <div className="rule-item">{t.rule5}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modal === 'gallery' && (
+        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
+          <div className="modal-card gallery-modal-card">
+            <div className="rules-head">
+              <div>
+                <h2 id="galleryTitle">{t.galleryTitle}</h2>
+                <p className="modal-text gallery-text">{t.galleryText}</p>
+              </div>
+              <button className="modal-close-btn" type="button" onClick={() => setModal(null)}>{t.close}</button>
+            </div>
+            <div className="gallery-grid">
+              {DIFFICULTIES.map((diff) => (
+                <section key={diff.id} className="gallery-section">
+                  <h3>{lang === 'ru' ? diff.ru : diff.en} · {diff.size}×{diff.size}</h3>
+                  <div className="gallery-cards">
+                    {PUZZLES[diff.id].map((item) => {
+                      const itemSolution = getSolution(item, diff.size);
+                      return (
+                        <div className="gallery-card" key={item.id}>
+                          <Preview solution={itemSolution} label={getPuzzleName(item, lang)} compact />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
           </div>
         </div>
@@ -1111,9 +1414,10 @@ export default function App() {
 
       {modal === 'win' && (
         <div className="modal" role="dialog" aria-modal="true">
-          <div className="modal-card">
+          <div className="modal-card result-modal-card">
             <h2>{t.winTitle}</h2>
-            <p className="modal-text">{t.winText(difficulty.reward)}</p>
+            <Preview solution={solution} label={puzzleName} />
+            <p className="modal-text">{t.winText(puzzleName, difficulty.reward)}</p>
             <div className="modal-actions">
               <button className="tool-btn primary" type="button" onClick={nextLevel}>{canGoNext ? t.nextLevel : t.playAgain}</button>
               <button className="tool-btn" type="button" onClick={() => resetGame(difficultyIndex, false)}>{t.playAgain}</button>
@@ -1124,9 +1428,10 @@ export default function App() {
 
       {modal === 'surrender' && (
         <div className="modal" role="dialog" aria-modal="true">
-          <div className="modal-card">
+          <div className="modal-card result-modal-card">
             <h2>{t.surrenderTitle}</h2>
-            <p className="modal-text">{t.surrenderText}</p>
+            <Preview solution={solution} label={puzzleName} />
+            <p className="modal-text">{t.surrenderText(puzzleName)}</p>
             <div className="modal-actions">
               <button className="tool-btn primary" type="button" onClick={() => resetGame(difficultyIndex, false)}>{t.newGame}</button>
             </div>
