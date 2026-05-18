@@ -120,6 +120,7 @@ window.YandexStorage = (function () {
         progress: data.progress ?? defaultState.progress,
         theme: data.theme ?? defaultState.theme,
         lang: data.lang ?? defaultState.lang,
+        solvedPictures: data.solvedPictures ?? defaultState.solvedPictures,
       };
     }
 
@@ -133,6 +134,7 @@ window.YandexStorage = (function () {
         progress: state.progress,
         theme: state.theme,
         lang: state.lang,
+        solvedPictures: state.solvedPictures,
       },
     };
 

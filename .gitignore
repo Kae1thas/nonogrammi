@@ -1,7 +1,4 @@
 node_modules/
 dist/
-.vscode/
-*.zip
-*.log
-.env
 .DS_Store
+*.zip

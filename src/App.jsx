@@ -5,6 +5,7 @@ const STORAGE_KEYS = {
   progress: 'nonograms_code_picture_progress_v2',
   theme: 'nonograms_code_picture_theme_v2',
   lang: 'nonograms_code_picture_lang_v2',
+  solvedPictures: 'nonograms_code_picture_solved_pictures_v3',
 };
 
 const WIN_TARGET = 5;
@@ -23,60 +24,76 @@ const DIFFICULTIES = [
 
 const PUZZLES = {
   warmup: [
-    { id: 'heart5', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
-    { id: 'house5', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
-    { id: 'smile5', nameRu: 'Улыбка', nameEn: 'Smile', rows: ['00000', '10101', '00000', '10001', '01110'] },
-    { id: 'tree5', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
-    { id: 'star5', nameRu: 'Звезда', nameEn: 'Star', rows: ['00100', '10101', '01110', '10101', '00100'] },
-    { id: 'cup5', nameRu: 'Кубок', nameEn: 'Cup', rows: ['11111', '10101', '01110', '00100', '01110'] },
+    { id: 'heart5w', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
+    { id: 'house5w', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
+    { id: 'tree5w', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
+    { id: 'cup5w', nameRu: 'Кубок', nameEn: 'Cup', rows: ['11111', '10101', '01110', '00100', '01110'] },
+    { id: 'flag5w', nameRu: 'Флажок', nameEn: 'Flag', rows: ['11100', '10100', '11100', '00100', '00100'] },
+    { id: 'bolt5w', nameRu: 'Молния', nameEn: 'Bolt', rows: ['00110', '01100', '11110', '00110', '01100'] },
+    { id: 'arrow5w', nameRu: 'Стрелка', nameEn: 'Arrow', rows: ['00100', '01100', '11111', '01100', '00100'] },
+    { id: 'duck5w', nameRu: 'Утка', nameEn: 'Duck', rows: ['01100', '11110', '10111', '11110', '00100'] },
   ],
   easy: [
     { id: 'heart5', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
     { id: 'house5', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
-    { id: 'smile5', nameRu: 'Улыбка', nameEn: 'Smile', rows: ['00000', '10101', '00000', '10001', '01110'] },
     { id: 'tree5', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
     { id: 'rocket5', nameRu: 'Ракета', nameEn: 'Rocket', rows: ['00100', '01110', '00100', '01110', '10101'] },
     { id: 'fish5', nameRu: 'Рыбка', nameEn: 'Fish', rows: ['00110', '11101', '11110', '11101', '00110'] },
+    { id: 'key5', nameRu: 'Ключ', nameEn: 'Key', rows: ['01100', '10111', '01100', '00100', '00111'] },
+    { id: 'star5', nameRu: 'Звезда', nameEn: 'Star', rows: ['00100', '10101', '01110', '11111', '01010'] },
+    { id: 'boat5', nameRu: 'Лодка', nameEn: 'Boat', rows: ['00100', '01100', '11110', '01111', '00110'] },
+    { id: 'crown5', nameRu: 'Корона', nameEn: 'Crown', rows: ['10101', '11111', '11111', '01110', '11111'] },
+    { id: 'moon5', nameRu: 'Луна', nameEn: 'Moon', rows: ['01110', '11100', '11000', '11100', '01110'] },
   ],
   medium: [
-    { id: 'flower10', nameRu: 'Цветок', nameEn: 'Flower', draw: 'flower' },
-    { id: 'cat10', nameRu: 'Кот', nameEn: 'Cat', draw: 'cat' },
-    { id: 'rocket10', nameRu: 'Ракета', nameEn: 'Rocket', draw: 'rocket' },
     { id: 'fish10', nameRu: 'Рыба', nameEn: 'Fish', draw: 'fish' },
     { id: 'key10', nameRu: 'Ключ', nameEn: 'Key', draw: 'key' },
-    { id: 'diamond10', nameRu: 'Алмаз', nameEn: 'Diamond', draw: 'diamond' },
+    { id: 'rocket10', nameRu: 'Ракета', nameEn: 'Rocket', draw: 'rocket' },
     { id: 'tree10', nameRu: 'Дерево', nameEn: 'Tree', draw: 'tree' },
     { id: 'ghost10', nameRu: 'Призрак', nameEn: 'Ghost', draw: 'ghost' },
+    { id: 'crown10', nameRu: 'Корона', nameEn: 'Crown', draw: 'crown' },
+    { id: 'turtle10', nameRu: 'Черепаха', nameEn: 'Turtle', draw: 'turtle' },
+    { id: 'ship10', nameRu: 'Кораблик', nameEn: 'Ship', draw: 'ship' },
+    { id: 'robot10', nameRu: 'Робот', nameEn: 'Robot', draw: 'robot' },
+    { id: 'anchor10', nameRu: 'Якорь', nameEn: 'Anchor', draw: 'anchor' },
+    { id: 'cactus10', nameRu: 'Кактус', nameEn: 'Cactus', draw: 'cactus' },
+    { id: 'trophy10', nameRu: 'Кубок', nameEn: 'Trophy', draw: 'trophy' },
   ],
   hard: [
-    { id: 'crown15', nameRu: 'Корона', nameEn: 'Crown', draw: 'crown' },
-    { id: 'castle15', nameRu: 'Замок', nameEn: 'Castle', draw: 'castle' },
-    { id: 'owl15', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
-    { id: 'turtle15', nameRu: 'Черепаха', nameEn: 'Turtle', draw: 'turtle' },
-    { id: 'ship15', nameRu: 'Корабль', nameEn: 'Ship', draw: 'ship' },
+    { id: 'ship15', nameRu: 'Парусник', nameEn: 'Sailboat', draw: 'ship' },
+    { id: 'cat15', nameRu: 'Кот', nameEn: 'Cat', draw: 'cat' },
     { id: 'robot15', nameRu: 'Робот', nameEn: 'Robot', draw: 'robot' },
-    { id: 'anchor15', nameRu: 'Якорь', nameEn: 'Anchor', draw: 'anchor' },
+    { id: 'lighthouse15', nameRu: 'Маяк', nameEn: 'Lighthouse', draw: 'lighthouse' },
+    { id: 'mushroom15', nameRu: 'Гриб', nameEn: 'Mushroom', draw: 'mushroom' },
+    { id: 'guitar15', nameRu: 'Гитара', nameEn: 'Guitar', draw: 'guitar' },
     { id: 'butterfly15', nameRu: 'Бабочка', nameEn: 'Butterfly', draw: 'butterfly' },
+    { id: 'skull15', nameRu: 'Череп', nameEn: 'Skull', draw: 'skull' },
+    { id: 'dragon15', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
+    { id: 'phoenix15', nameRu: 'Феникс', nameEn: 'Phoenix', draw: 'phoenix' },
   ],
   epic: [
+    { id: 'castle20', nameRu: 'Замок', nameEn: 'Castle', draw: 'castle' },
     { id: 'dragon20', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
-    { id: 'skull20', nameRu: 'Череп', nameEn: 'Skull', draw: 'skull' },
-    { id: 'castle20', nameRu: 'Большой замок', nameEn: 'Big Castle', draw: 'castle' },
     { id: 'owl20', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
-    { id: 'cactus20', nameRu: 'Кактус', nameEn: 'Cactus', draw: 'cactus' },
+    { id: 'rocket20', nameRu: 'Ракета', nameEn: 'Rocket', draw: 'rocket' },
+    { id: 'wizard20', nameRu: 'Волшебник', nameEn: 'Wizard', draw: 'wizard' },
     { id: 'spaceship20', nameRu: 'Космолёт', nameEn: 'Spaceship', draw: 'spaceship' },
+    { id: 'anchor20', nameRu: 'Якорь', nameEn: 'Anchor', draw: 'anchor' },
     { id: 'butterfly20', nameRu: 'Бабочка', nameEn: 'Butterfly', draw: 'butterfly' },
+    { id: 'cactus20', nameRu: 'Кактус', nameEn: 'Cactus', draw: 'cactus' },
     { id: 'trophy20', nameRu: 'Кубок', nameEn: 'Trophy', draw: 'trophy' },
   ],
   abyss: [
-    { id: 'dragon30', nameRu: 'Большой дракон', nameEn: 'Big Dragon', draw: 'dragon' },
-    { id: 'castle30', nameRu: 'Крепость', nameEn: 'Fortress', draw: 'castle' },
-    { id: 'spaceship30', nameRu: 'Звездолёт', nameEn: 'Starship', draw: 'spaceship' },
-    { id: 'owl30', nameRu: 'Мудрая сова', nameEn: 'Wise Owl', draw: 'owl' },
-    { id: 'skull30', nameRu: 'Пиратский череп', nameEn: 'Pirate Skull', draw: 'skull' },
-    { id: 'ship30', nameRu: 'Парусник', nameEn: 'Sailboat', draw: 'ship' },
-    { id: 'robot30', nameRu: 'Большой робот', nameEn: 'Big Robot', draw: 'robot' },
+    { id: 'airship30', nameRu: 'Дирижабль', nameEn: 'Airship', draw: 'airship' },
+    { id: 'submarine30', nameRu: 'Подлодка', nameEn: 'Submarine', draw: 'submarine' },
     { id: 'phoenix30', nameRu: 'Феникс', nameEn: 'Phoenix', draw: 'phoenix' },
+    { id: 'owl30', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
+    { id: 'mecha30', nameRu: 'Меха', nameEn: 'Mecha', draw: 'mecha' },
+    { id: 'dragon30', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
+    { id: 'city30', nameRu: 'Город', nameEn: 'City', draw: 'city' },
+    { id: 'train30', nameRu: 'Поезд', nameEn: 'Train', draw: 'train' },
+    { id: 'plane30', nameRu: 'Самолёт', nameEn: 'Plane', draw: 'plane' },
+    { id: 'fortress30', nameRu: 'Крепость', nameEn: 'Fortress', draw: 'fortress' },
   ],
 };
 
@@ -97,7 +114,7 @@ const I18N = {
     mistakes: 'Ошибки',
     freeMode: 'Свободный режим',
     freeModeMetaLocked: 'Откроется после 5 побед на уровне',
-    freeModeMetaOpen: 'Без жизней: ошибки видны при проверке',
+    freeModeMetaOpen: 'Открывай оставшиеся рисунки этого уровня',
     locked: 'Закрыт',
     enabled: 'Вкл',
     newGame: 'Новая игра',
@@ -130,7 +147,7 @@ const I18N = {
     buyLife: 'Продолжить за 50 монет',
     restart: 'Рестарт',
     winTitle: 'Рисунок открыт',
-    winText: (name, reward) => `Это «${name}». Победа засчитана, награда: ${reward} монет.`,
+    winText: (name, reward) => reward > 0 ? `Это «${name}». Победа засчитана, награда: ${reward} монет.` : `Это «${name}». Свободный режим: награда и прогресс не начисляются.`,
     nextLevel: 'Следующий уровень',
     playAgain: 'Играть снова',
     surrenderTitle: 'Решение раскрыто',
@@ -142,7 +159,8 @@ const I18N = {
     notSolved: (n) => `Пока не сходится. Нужно исправить: ${n}.`,
     freeLockedMessage: (title) => `Свободный режим для «${title}» откроется после 5 побед.`,
     galleryTitle: 'Готовые картинки',
-    galleryText: 'Здесь можно посмотреть силуэты и названия рисунков. В игре они не раскрывают текущую партию автоматически.',
+    galleryText: 'Прогресс по каждому уровню: открытые картинки показаны, закрытые скрыты карточками.',
+    galleryEmpty: 'Пока нет открытых картинок на этом уровне.',
   },
   en: {
     title: 'Nonograms Code Picture',
@@ -160,7 +178,7 @@ const I18N = {
     mistakes: 'Errors',
     freeMode: 'Free mode',
     freeModeMetaLocked: 'Unlocks after 5 wins on this level',
-    freeModeMetaOpen: 'No lives: errors show on check',
+    freeModeMetaOpen: 'Open the remaining pictures on this level',
     locked: 'Locked',
     enabled: 'On',
     newGame: 'New game',
@@ -193,7 +211,7 @@ const I18N = {
     buyLife: 'Continue for 50 coins',
     restart: 'Restart',
     winTitle: 'Picture solved',
-    winText: (name, reward) => `This is “${name}”. Win recorded, reward: ${reward} coins.`,
+    winText: (name, reward) => reward > 0 ? `This is “${name}”. Win recorded, reward: ${reward} coins.` : `This is “${name}”. Free mode: no extra reward or progress.`,
     nextLevel: 'Next level',
     playAgain: 'Play again',
     surrenderTitle: 'Solution revealed',
@@ -205,12 +223,28 @@ const I18N = {
     notSolved: (n) => `Not solved yet. Fix cells: ${n}.`,
     freeLockedMessage: (title) => `Free mode for “${title}” unlocks after 5 wins.`,
     galleryTitle: 'Finished pictures',
-    galleryText: 'Preview silhouettes and names. The current puzzle is not automatically revealed during play.',
+    galleryText: 'Progress by level: solved pictures are shown, locked cards stay hidden.',
+    galleryEmpty: 'No finished pictures on this level yet.',
   },
 };
 
 function normalizeLang(value) {
   return String(value || '').toLowerCase().startsWith('en') ? 'en' : 'ru';
+}
+
+function hasExplicitLanguageOverride() {
+  return new URLSearchParams(window.location.search).has('lang');
+}
+
+function detectInitialLang() {
+  const params = new URLSearchParams(window.location.search);
+  return normalizeLang(
+    params.get('lang')
+    || localStorage.getItem(STORAGE_KEYS.lang)
+    || document.documentElement.lang
+    || navigator.language
+    || 'ru'
+  );
 }
 
 function getLocalJson(key, fallback) {
@@ -233,6 +267,35 @@ function setLocalJson(key, value) {
 
 function rowsToMatrix(rows) {
   return rows.map((row) => row.split('').map((cell) => cell === '1'));
+}
+
+function scaleRows(rows, targetSize) {
+  const source = rowsToMatrix(rows);
+  const filled = [];
+
+  source.forEach((row, r) => {
+    row.forEach((cell, c) => {
+      if (cell) filled.push([r, c]);
+    });
+  });
+
+  if (!filled.length) return rows;
+
+  const minR = Math.min(...filled.map(([r]) => r));
+  const maxR = Math.max(...filled.map(([r]) => r));
+  const minC = Math.min(...filled.map(([, c]) => c));
+  const maxC = Math.max(...filled.map(([, c]) => c));
+  const trimmed = source.slice(minR, maxR + 1).map((row) => row.slice(minC, maxC + 1));
+  const sourceH = trimmed.length;
+  const sourceW = trimmed[0].length;
+
+  return Array.from({ length: targetSize }, (_, r) => {
+    const sr = Math.min(sourceH - 1, Math.floor((r * sourceH) / targetSize));
+    return Array.from({ length: targetSize }, (_, c) => {
+      const sc = Math.min(sourceW - 1, Math.floor((c * sourceW) / targetSize));
+      return trimmed[sr][sc] ? '1' : '0';
+    }).join('');
+  });
 }
 
 function makeMatrix(size, predicate) {
@@ -410,6 +473,113 @@ function drawByName(name, size) {
       const beams = ny > 0.25 && ny < 0.78 && (abs(nx) < 0.08 || abs(nx + 0.36) < 0.06 || abs(nx - 0.36) < 0.06);
       return body || dome || beams;
     }),
+
+    lighthouse: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const tower = abs(nx) < 0.22 + Math.max(0, ny) * 0.12 && ny > -0.58 && ny < 0.88;
+      const light = ny < -0.5 && abs(nx) < 0.52;
+      const roof = ny < -0.72 && abs(nx) < (ny + 0.94) * 2.2;
+      const beam = ny > -0.56 && ny < -0.12 && nx > 0.18 && nx < 0.92 && abs(ny + 0.34) < (nx - 0.08) * 0.22;
+      const window = abs(nx) < 0.08 && ny > -0.12 && ny < 0.15;
+      const base = ny > 0.7 && abs(nx) < 0.48;
+      return (tower || light || roof || beam || base) && !window;
+    }),
+    mushroom: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const cap = (nx * nx) / 0.74 + ((ny + 0.35) * (ny + 0.35)) / 0.32 < 1 && ny < 0.05;
+      const under = ny > -0.08 && ny < 0.18 && abs(nx) < 0.54;
+      const stem = abs(nx) < 0.22 + Math.max(0, ny) * 0.10 && ny > 0.05 && ny < 0.82;
+      const spot1 = ((nx + 0.34) ** 2) / 0.025 + ((ny + 0.42) ** 2) / 0.035 < 1;
+      const spot2 = ((nx - 0.22) ** 2) / 0.03 + ((ny + 0.52) ** 2) / 0.03 < 1;
+      const spot3 = (nx * nx) / 0.025 + ((ny + 0.25) ** 2) / 0.025 < 1;
+      return (cap || under || stem) && !(spot1 || spot2 || spot3);
+    }),
+    guitar: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body1 = ((nx + 0.28) ** 2) / 0.32 + ((ny - 0.28) ** 2) / 0.28 < 1;
+      const body2 = ((nx - 0.02) ** 2) / 0.23 + ((ny + 0.03) ** 2) / 0.20 < 1;
+      const hole = ((nx - 0.03) ** 2) / 0.035 + ((ny + 0.02) ** 2) / 0.035 < 1;
+      const neck = abs((ny + 0.48) - (nx - 0.1) * 0.55) < 0.08 && nx > 0.12 && nx < 0.82 && ny < -0.08;
+      const head = nx > 0.68 && nx < 0.95 && ny < -0.55 && ny > -0.86;
+      return (body1 || body2 || neck || head) && !hole;
+    }),
+    wizard: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const hat = ny < -0.35 && abs(nx + 0.12) < (ny + 1.02) * 0.42;
+      const brim = ny > -0.42 && ny < -0.28 && abs(nx) < 0.62;
+      const robe = ny > -0.2 && ny < 0.85 && abs(nx) < 0.24 + (ny + 0.2) * 0.42;
+      const staff = abs(nx - 0.72) < 0.05 && ny > -0.74 && ny < 0.84;
+      const star = abs(nx - 0.72) + abs(ny + 0.82) < 0.18;
+      const face = abs(nx + 0.04) < 0.16 && ny > -0.18 && ny < 0.05;
+      return (hat || brim || robe || staff || star) && !face;
+    }),
+    airship: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const hull = ((nx + 0.05) ** 2) / 0.92 + ((ny + 0.18) ** 2) / 0.28 < 1;
+      const tail = nx < -0.72 && abs(ny + 0.16) < 0.28 + (nx + 0.72) * 0.5;
+      const cabin = ny > 0.18 && ny < 0.42 && nx > -0.2 && nx < 0.38;
+      const ropes = ny > 0.06 && ny < 0.28 && (abs(nx + 0.32) < 0.04 || abs(nx - 0.12) < 0.04 || abs(nx - 0.48) < 0.04);
+      return hull || tail || cabin || ropes;
+    }),
+    submarine: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const body = (nx * nx) / 0.88 + ((ny - 0.08) ** 2) / 0.28 < 1;
+      const tail = nx < -0.7 && abs(ny - 0.08) < 0.22 + (-nx - 0.7) * 0.9;
+      const tower = nx > -0.1 && nx < 0.28 && ny > -0.45 && ny < -0.18;
+      const periscope = nx > 0.08 && nx < 0.20 && ny > -0.72 && ny < -0.44;
+      const eye1 = ((nx - 0.36) ** 2) / 0.025 + ((ny + 0.02) ** 2) / 0.025 < 1;
+      const eye2 = ((nx - 0.02) ** 2) / 0.025 + ((ny + 0.02) ** 2) / 0.025 < 1;
+      return (body || tail || tower || periscope) && !(eye1 || eye2);
+    }),
+    mecha: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const head = abs(nx) < 0.36 && ny > -0.78 && ny < -0.42;
+      const body = abs(nx) < 0.52 && ny > -0.34 && ny < 0.32;
+      const shoulders = ny > -0.28 && ny < -0.02 && abs(nx) < 0.78;
+      const arms = ny > 0.0 && ny < 0.5 && abs(nx) > 0.52 && abs(nx) < 0.82;
+      const legs = ny > 0.3 && ny < 0.9 && (abs(nx + 0.24) < 0.14 || abs(nx - 0.24) < 0.14);
+      const visor = ny > -0.64 && ny < -0.55 && abs(nx) < 0.22;
+      return (head || body || shoulders || arms || legs) && !visor;
+    }),
+    city: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const ground = ny > 0.78;
+      const b1 = nx > -0.95 && nx < -0.62 && ny > -0.2;
+      const b2 = nx > -0.58 && nx < -0.24 && ny > -0.62;
+      const b3 = nx > -0.18 && nx < 0.18 && ny > -0.38;
+      const b4 = nx > 0.24 && nx < 0.58 && ny > -0.72;
+      const b5 = nx > 0.64 && nx < 0.94 && ny > -0.05;
+      const windows = ((Math.floor((nx + 1) * size * 0.45) + Math.floor((ny + 1) * size * 0.45)) % 3 === 0) && ny > -0.6 && ny < 0.65;
+      return (ground || b1 || b2 || b3 || b4 || b5) && !windows;
+    }),
+    train: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const engine = nx > -0.78 && nx < 0.78 && ny > -0.28 && ny < 0.42;
+      const cabin = nx > 0.25 && nx < 0.68 && ny > -0.62 && ny < -0.24;
+      const chimney = nx > -0.58 && nx < -0.42 && ny > -0.62 && ny < -0.28;
+      const front = nx > 0.72 && nx < 0.95 && ny > -0.08 && ny < 0.42;
+      const wheels = ny > 0.46 && ny < 0.78 && (abs(nx + 0.5) < 0.18 || abs(nx) < 0.18 || abs(nx - 0.5) < 0.18);
+      const windows = ny > -0.12 && ny < 0.12 && (abs(nx + 0.24) < 0.08 || abs(nx - 0.05) < 0.08 || abs(nx - 0.36) < 0.08);
+      return (engine || cabin || chimney || front || wheels) && !windows;
+    }),
+    plane: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const fuselage = abs(ny) < 0.12 && nx > -0.82 && nx < 0.78;
+      const nose = nx > 0.68 && abs(ny) < (0.95 - nx) * 0.8;
+      const tail = nx < -0.62 && abs(ny) < 0.28;
+      const wing1 = ny < 0 && ny > -0.72 && nx > -0.26 && nx < 0.28 && abs(ny) < (0.38 - nx) * 0.9;
+      const wing2 = ny > 0 && ny < 0.72 && nx > -0.3 && nx < 0.22 && ny < (0.34 - nx) * 0.75;
+      return fuselage || nose || tail || wing1 || wing2;
+    }),
+    fortress: () => makeMatrix(size, (r, c) => {
+      const nx = x(c); const ny = y(r);
+      const wall = ny > -0.02 && ny < 0.84 && abs(nx) < 0.88;
+      const towers = ny > -0.58 && ny < 0.84 && (abs(nx + 0.64) < 0.20 || abs(nx) < 0.20 || abs(nx - 0.64) < 0.20);
+      const battlements = ny > -0.7 && ny < -0.5 && (Math.floor((nx + 1) * 7) % 2 === 0);
+      const gate = ny > 0.42 && abs(nx) < 0.15;
+      const slit = ny > -0.18 && ny < 0.05 && (abs(nx + 0.62) < 0.04 || abs(nx) < 0.04 || abs(nx - 0.62) < 0.04);
+      return (wall || towers || battlements) && !gate && !slit;
+    }),
     trophy: () => makeMatrix(size, (r, c) => {
       const nx = x(c); const ny = y(r);
       const cup = abs(nx) < 0.48 - Math.max(0, ny + 0.28) * 0.2 && ny > -0.72 && ny < 0.2;
@@ -441,9 +611,42 @@ function drawByName(name, size) {
   return (drawers[name] || drawers.diamond)();
 }
 
+function fitMatrixToCanvas(matrix, targetSize, padding = 0) {
+  const filled = [];
+  matrix.forEach((row, r) => {
+    row.forEach((cell, c) => {
+      if (cell) filled.push([r, c]);
+    });
+  });
+
+  if (!filled.length) return matrix;
+
+  const minR = Math.min(...filled.map(([r]) => r));
+  const maxR = Math.max(...filled.map(([r]) => r));
+  const minC = Math.min(...filled.map(([, c]) => c));
+  const maxC = Math.max(...filled.map(([, c]) => c));
+  const trimmed = matrix.slice(minR, maxR + 1).map((row) => row.slice(minC, maxC + 1));
+  const sourceH = trimmed.length;
+  const sourceW = trimmed[0].length;
+  const inner = Math.max(1, targetSize - padding * 2);
+
+  return Array.from({ length: targetSize }, (_, r) => (
+    Array.from({ length: targetSize }, (_, c) => {
+      if (r < padding || c < padding || r >= targetSize - padding || c >= targetSize - padding) return false;
+      const rr = r - padding;
+      const cc = c - padding;
+      const sr = Math.min(sourceH - 1, Math.floor((rr * sourceH) / inner));
+      const sc = Math.min(sourceW - 1, Math.floor((cc * sourceW) / inner));
+      return Boolean(trimmed[sr][sc]);
+    })
+  ));
+}
+
 function getSolution(puzzle, size) {
   if (puzzle.rows) return rowsToMatrix(puzzle.rows);
-  return drawByName(puzzle.draw, size);
+  const padding = size >= 20 ? 0 : size >= 15 ? 1 : 0;
+  if (puzzle.baseRows) return fitMatrixToCanvas(rowsToMatrix(puzzle.baseRows), size, padding);
+  return fitMatrixToCanvas(drawByName(puzzle.draw, size), size, padding);
 }
 
 function buildClue(line) {
@@ -547,14 +750,31 @@ function isFreeModeUnlocked(diffId, progress) {
   return (progress[diffId] || 0) >= WIN_TARGET;
 }
 
-function pickPuzzle(diffId, exceptIndex = -1) {
+function getFixedClueSlots(size) {
+  if (size <= 5) return 3;
+  if (size <= 10) return 4;
+  if (size <= 15) return 5;
+  if (size <= 20) return 6;
+  return 7;
+}
+
+function pickPuzzle(diffId, exceptIndex = -1, solvedIds = []) {
   const list = PUZZLES[diffId];
   if (!list || !list.length) return { puzzle: PUZZLES.easy[0], index: 0 };
-  if (list.length === 1) return { puzzle: list[0], index: 0 };
 
-  let index = Math.floor(Math.random() * list.length);
-  if (index === exceptIndex) index = (index + 1) % list.length;
-  return { puzzle: list[index], index };
+  const solvedSet = new Set(solvedIds || []);
+  let candidates = list.map((item, index) => ({ item, index }));
+
+  const freshCandidates = candidates.filter(({ item }) => !solvedSet.has(item.id));
+  if (freshCandidates.length) candidates = freshCandidates;
+
+  if (candidates.length > 1 && exceptIndex >= 0) {
+    const withoutCurrent = candidates.filter(({ index }) => index !== exceptIndex);
+    if (withoutCurrent.length) candidates = withoutCurrent;
+  }
+
+  const selected = candidates[Math.floor(Math.random() * candidates.length)] || { item: list[0], index: 0 };
+  return { puzzle: selected.item, index: selected.index };
 }
 
 function getPuzzleName(puzzle, lang) {
@@ -569,7 +789,7 @@ function installInteractionGuards(suppressClickRef) {
   let isTracking = false;
   let didScroll = false;
 
-  const shouldIgnoreTarget = (target) => !!target.closest?.('.modal, .overlay, input, textarea, select, button, .nonogram-stage, .gallery-grid');
+  const shouldIgnoreTarget = (target) => !!target.closest?.('.modal, .overlay, input, textarea, select, button, .gallery-grid');
 
   const startTracking = (event) => {
     if (event.touches.length !== 1 || shouldIgnoreTarget(event.target)) {
@@ -678,10 +898,11 @@ function Preview({ solution, label, compact = false }) {
 export default function App() {
   const initialProgress = useMemo(() => getLocalJson(STORAGE_KEYS.progress, {}), []);
   const [hydrated, setHydrated] = useState(false);
-  const [lang, setLang] = useState(() => normalizeLang(localStorage.getItem(STORAGE_KEYS.lang) || 'ru'));
+  const [lang, setLang] = useState(() => detectInitialLang());
   const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEYS.theme) || 'dark');
   const [coins, setCoins] = useState(() => Number(localStorage.getItem(STORAGE_KEYS.coins) || START_COINS));
   const [progress, setProgress] = useState(initialProgress);
+  const [solvedPictures, setSolvedPictures] = useState(() => getLocalJson(STORAGE_KEYS.solvedPictures, {}));
   const [difficultyIndex, setDifficultyIndex] = useState(0);
   const [puzzleIndex, setPuzzleIndex] = useState(() => INITIAL_PICK.index);
   const [marks, setMarks] = useState(() => starterMarksFor(getSolution(INITIAL_PICK.puzzle, DIFFICULTIES[0].size)));
@@ -698,12 +919,13 @@ export default function App() {
   const [cellSize, setCellSize] = useState(38);
   const [clueWidth, setClueWidth] = useState(96);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [lastReward, setLastReward] = useState(0);
 
   const stageRef = useRef(null);
   const suppressClickRef = useRef(0);
   const saveTimerRef = useRef(null);
   const notificationTimerRef = useRef(null);
-  const dragRef = useRef({ active: false, target: 'filled', pointerId: null, touched: new Set() });
+  const dragRef = useRef({ active: false, target: 'filled', pointerId: null, touched: new Set(), axis: null });
   const winLockRef = useRef(false);
 
   const t = I18N[lang];
@@ -712,10 +934,12 @@ export default function App() {
   const puzzleName = getPuzzleName(puzzle, lang);
   const solution = useMemo(() => getSolution(puzzle, difficulty.size), [puzzle, difficulty.size]);
   const { rowClues, colClues } = useMemo(() => buildClues(solution), [solution]);
+  const rowClueDepth = getFixedClueSlots(difficulty.size);
+  const colClueDepth = getFixedClueSlots(difficulty.size);
   const remaining = useMemo(() => countRemaining(marks, solution), [marks, solution]);
-  const mistakeCount = useMemo(() => countErrors(marks, solution), [marks, solution]);
   const timeText = formatTime(elapsed);
   const freeUnlocked = isFreeModeUnlocked(difficulty.id, progress);
+  const clueToken = difficulty.size >= 30 ? 13 : difficulty.size >= 20 ? 15 : difficulty.size >= 15 ? 17 : difficulty.size >= 10 ? 19 : 22;
 
   const showNotification = useCallback((text) => {
     setNotification(text);
@@ -729,30 +953,38 @@ export default function App() {
       progress: next.progress ?? progress,
       theme: next.theme ?? theme,
       lang: next.lang ?? lang,
+      solvedPictures: next.solvedPictures ?? solvedPictures,
     };
 
     localStorage.setItem(STORAGE_KEYS.coins, String(payload.coins));
     setLocalJson(STORAGE_KEYS.progress, payload.progress);
     localStorage.setItem(STORAGE_KEYS.theme, payload.theme);
     localStorage.setItem(STORAGE_KEYS.lang, payload.lang);
+    setLocalJson(STORAGE_KEYS.solvedPictures, payload.solvedPictures);
 
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     saveTimerRef.current = window.setTimeout(() => {
       window.YandexStorage?.saveGameState?.(payload);
     }, 250);
-  }, [coins, progress, theme, lang]);
+  }, [coins, progress, theme, lang, solvedPictures]);
 
-  const resetGame = useCallback((nextDifficultyIndex = difficultyIndex, keepPuzzleIndex = false) => {
+  const resetGame = useCallback((nextDifficultyIndex = difficultyIndex, keepPuzzleIndex = false, options = {}) => {
     const nextDifficulty = DIFFICULTIES[nextDifficultyIndex];
+    const nextFreeMode = options.freeMode ?? freeMode;
+    const solvedIds = solvedPictures[nextDifficulty.id] || [];
     const picked = keepPuzzleIndex
       ? { index: puzzleIndex }
-      : pickPuzzle(nextDifficulty.id, nextDifficultyIndex === difficultyIndex ? puzzleIndex : -1);
+      : pickPuzzle(
+        nextDifficulty.id,
+        nextDifficultyIndex === difficultyIndex ? puzzleIndex : -1,
+        solvedIds,
+      );
     const nextPuzzle = PUZZLES[nextDifficulty.id][picked.index] || PUZZLES[nextDifficulty.id][0];
     const nextSolution = getSolution(nextPuzzle, nextDifficulty.size);
 
     setDifficultyIndex(nextDifficultyIndex);
     setPuzzleIndex(picked.index);
-    setMarks(nextDifficulty.starterCrosses ? starterMarksFor(nextSolution) : makeEmptyMarks(nextDifficulty.size));
+    setMarks(nextDifficulty.starterCrosses && !nextFreeMode ? starterMarksFor(nextSolution) : makeEmptyMarks(nextDifficulty.size));
     setLives(nextDifficulty.lives);
     setSelectedCell(null);
     setElapsed(0);
@@ -761,9 +993,10 @@ export default function App() {
     setModal(null);
     setHintUsed(false);
     setIsCompleting(false);
+    setLastReward(0);
     winLockRef.current = false;
-    dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set() };
-  }, [difficultyIndex, puzzleIndex]);
+    dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set(), axis: null };
+  }, [difficultyIndex, freeMode, puzzleIndex, solvedPictures]);
 
   const stopGameplay = useCallback(() => {
     window.YandexStorage?.stopGameplay?.();
@@ -784,20 +1017,33 @@ export default function App() {
     setTimerActive(false);
     setMarks(revealPictureMarks(solution));
 
-    setProgress((prev) => {
-      const next = { ...prev, [difficulty.id]: (prev[difficulty.id] || 0) + 1 };
-      setCoins((coinValue) => {
-        const nextCoins = coinValue + difficulty.reward;
-        syncSave({ coins: nextCoins, progress: next });
-        return nextCoins;
+    const alreadySolved = (solvedPictures[difficulty.id] || []).includes(puzzle.id);
+    const nextSolvedPictures = {
+      ...solvedPictures,
+      [difficulty.id]: Array.from(new Set([...(solvedPictures[difficulty.id] || []), puzzle.id])),
+    };
+    setSolvedPictures(nextSolvedPictures);
+
+    if (alreadySolved) {
+      setLastReward(0);
+      syncSave({ solvedPictures: nextSolvedPictures });
+    } else {
+      setLastReward(difficulty.reward);
+      setProgress((prev) => {
+        const next = { ...prev, [difficulty.id]: (prev[difficulty.id] || 0) + 1 };
+        setCoins((coinValue) => {
+          const nextCoins = coinValue + difficulty.reward;
+          syncSave({ coins: nextCoins, progress: next, solvedPictures: nextSolvedPictures });
+          return nextCoins;
+        });
+        return next;
       });
-      return next;
-    });
+    }
 
     window.setTimeout(() => {
       setModal('win');
     }, 950);
-  }, [difficulty.id, difficulty.reward, solution, stopGameplay, syncSave]);
+  }, [difficulty.id, difficulty.reward, puzzle.id, solution, solvedPictures, stopGameplay, syncSave]);
 
   const checkWinAfterMove = useCallback((nextMarks) => {
     if (isSolved(nextMarks, solution)) {
@@ -807,7 +1053,7 @@ export default function App() {
     return false;
   }, [finishWin, solution]);
 
-  const applyCell = useCallback((row, col, targetOverride = null) => {
+  const applyCell = useCallback((row, col, targetOverride = null, options = {}) => {
     if (Date.now() < suppressClickRef.current) return;
     if (isPaused || modal || lives <= 0 || isCompleting) return;
 
@@ -821,7 +1067,13 @@ export default function App() {
         ? (current === 'cross' ? 'empty' : 'cross')
         : (current === 'filled' ? 'empty' : 'filled'));
 
+      if (options.fromDrag) {
+        if (target === 'filled' && current === 'cross') return prev;
+        if (target === 'cross' && current === 'filled') return prev;
+      }
+
       if (target === 'empty') {
+        if (options.fromDrag && current !== dragRef.current.sourceMark) return prev;
         next[row][col] = 'empty';
         return next;
       }
@@ -831,7 +1083,7 @@ export default function App() {
         return next;
       }
 
-      if (!freeMode && !solution[row][col] && current !== 'filled') {
+      if (!solution[row][col] && current !== 'filled') {
         next[row][col] = 'cross';
         setLives((value) => {
           const nextLives = Math.max(0, value - 1);
@@ -850,7 +1102,42 @@ export default function App() {
       checkWinAfterMove(next);
       return next;
     });
-  }, [checkWinAfterMove, freeMode, isCompleting, isPaused, lives, modal, showNotification, solution, startGameplay, stopGameplay, t.wrongCell, tool]);
+  }, [checkWinAfterMove, isCompleting, isPaused, lives, modal, showNotification, solution, startGameplay, stopGameplay, t.wrongCell, tool]);
+
+  const applyDragPath = useCallback((row, col, event = null) => {
+    const drag = dragRef.current;
+    if (!drag.active) return;
+
+    let axis = drag.axis;
+    if (!axis && (row !== drag.startRow || col !== drag.startCol)) {
+      const dRow = Math.abs(row - drag.startRow);
+      const dCol = Math.abs(col - drag.startCol);
+      axis = dRow >= dCol ? 'vertical' : 'horizontal';
+      drag.axis = axis;
+    }
+
+    if (axis === 'vertical') col = drag.startCol;
+    if (axis === 'horizontal') row = drag.startRow;
+
+    const fromRow = drag.lastRow;
+    const fromCol = drag.lastCol;
+    const stepR = Math.sign(row - fromRow);
+    const stepC = Math.sign(col - fromCol);
+    const steps = Math.max(Math.abs(row - fromRow), Math.abs(col - fromCol));
+
+    for (let i = 1; i <= steps; i += 1) {
+      const nextRow = fromRow + stepR * i;
+      const nextCol = fromCol + stepC * i;
+      const key = `${nextRow}:${nextCol}`;
+      if (drag.touched.has(key)) continue;
+      drag.touched.add(key);
+      applyCell(nextRow, nextCol, drag.target, { fromDrag: true });
+    }
+
+    drag.lastRow = row;
+    drag.lastCol = col;
+    if (event?.cancelable) event.preventDefault();
+  }, [applyCell]);
 
   const handlePointerDown = useCallback((event, row, col, currentMark) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
@@ -861,21 +1148,43 @@ export default function App() {
       ? (currentMark === 'cross' ? 'empty' : 'cross')
       : (currentMark === 'filled' ? 'empty' : 'filled');
 
-    dragRef.current = { active: true, target, pointerId: event.pointerId, touched: new Set([`${row}:${col}`]) };
-    applyCell(row, col, target);
+    dragRef.current = {
+      active: true,
+      target,
+      pointerId: event.pointerId,
+      startRow: row,
+      startCol: col,
+      lastRow: row,
+      lastCol: col,
+      axis: null,
+      sourceMark: currentMark,
+      touched: new Set([`${row}:${col}`]),
+    };
+    applyCell(row, col, target, { fromDrag: false });
   }, [applyCell, tool]);
 
   const handlePointerEnter = useCallback((event, row, col) => {
     const drag = dragRef.current;
     if (!drag.active || drag.pointerId !== event.pointerId) return;
-    const key = `${row}:${col}`;
-    if (drag.touched.has(key)) return;
-    drag.touched.add(key);
-    applyCell(row, col, drag.target);
-  }, [applyCell]);
+    applyDragPath(row, col, event);
+  }, [applyDragPath]);
+
+  const handlePointerMove = useCallback((event) => {
+    const drag = dragRef.current;
+    if (!drag.active || drag.pointerId !== event.pointerId) return;
+
+    const element = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('.nono-cell');
+    if (!element) return;
+
+    const row = Number(element.dataset.row);
+    const col = Number(element.dataset.col);
+    if (!Number.isInteger(row) || !Number.isInteger(col)) return;
+
+    applyDragPath(row, col, event);
+  }, [applyDragPath]);
 
   const handlePointerUp = useCallback(() => {
-    dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set() };
+    dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set(), axis: null };
   }, []);
 
   const useHint = useCallback(() => {
@@ -954,17 +1263,19 @@ export default function App() {
       showNotification(t.freeLockedMessage(lang === 'ru' ? difficulty.ru : difficulty.en));
       return;
     }
-    setFreeMode((value) => !value);
-    resetGame(difficultyIndex, true);
-  }, [difficulty, difficultyIndex, isCompleting, isPaused, lang, modal, progress, resetGame, showNotification, t]);
+    const nextFreeMode = !freeMode;
+    setFreeMode(nextFreeMode);
+    resetGame(difficultyIndex, false, { freeMode: nextFreeMode });
+  }, [difficulty, difficultyIndex, freeMode, isCompleting, isPaused, lang, modal, progress, resetGame, showNotification, t]);
 
   const selectDifficulty = useCallback((index) => {
     if (isPaused || modal || isCompleting) return;
     if (!isDifficultyUnlocked(index, progress)) return;
     const nextDifficulty = DIFFICULTIES[index];
-    setFreeMode((value) => (value && isFreeModeUnlocked(nextDifficulty.id, progress) ? value : false));
-    resetGame(index, false);
-  }, [isCompleting, isPaused, modal, progress, resetGame]);
+    const nextFreeMode = freeMode && isFreeModeUnlocked(nextDifficulty.id, progress);
+    setFreeMode(nextFreeMode);
+    resetGame(index, false, { freeMode: nextFreeMode });
+  }, [freeMode, isCompleting, isPaused, modal, progress, resetGame]);
 
   const nextLevel = useCallback(() => {
     const nextIndex = Math.min(difficultyIndex + 1, DIFFICULTIES.length - 1);
@@ -995,21 +1306,25 @@ export default function App() {
     async function bootstrap() {
       await window.YandexStorage?.init?.();
 
-      const hasManualLang = Boolean(localStorage.getItem(STORAGE_KEYS.lang));
+      const params = new URLSearchParams(window.location.search);
+      const explicitLang = hasExplicitLanguageOverride();
       const sdkLang = window.YandexStorage?.getLanguage?.();
+      const defaultLang = detectInitialLang();
       const defaultState = {
         coins: Number(localStorage.getItem(STORAGE_KEYS.coins) || START_COINS),
         progress: getLocalJson(STORAGE_KEYS.progress, {}),
         theme: localStorage.getItem(STORAGE_KEYS.theme) || 'dark',
-        lang: hasManualLang ? normalizeLang(localStorage.getItem(STORAGE_KEYS.lang)) : normalizeLang(sdkLang || 'ru'),
+        lang: defaultLang,
+        solvedPictures: getLocalJson(STORAGE_KEYS.solvedPictures, {}),
       };
       const loaded = await window.YandexStorage?.loadGameState?.(defaultState) || defaultState;
 
       if (cancelled) return;
       setCoins(loaded.coins);
       setProgress(loaded.progress || {});
+      setSolvedPictures(loaded.solvedPictures || {});
       setTheme(loaded.theme || 'dark');
-      setLang(hasManualLang ? defaultState.lang : normalizeLang(sdkLang || loaded.lang || 'ru'));
+      setLang(explicitLang ? normalizeLang(params.get('lang')) : normalizeLang(sdkLang || defaultLang || 'ru'));
       setHydrated(true);
 
       window.requestAnimationFrame(() => {
@@ -1034,13 +1349,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    window.addEventListener('pointermove', handlePointerMove, { passive: false });
     window.addEventListener('pointerup', handlePointerUp);
     window.addEventListener('pointercancel', handlePointerUp);
     return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [handlePointerUp]);
+  }, [handlePointerMove, handlePointerUp]);
 
   useEffect(() => {
     if (!timerActive || isPaused || modal === 'pause') return undefined;
@@ -1062,7 +1379,7 @@ export default function App() {
 
   useEffect(() => {
     if (hydrated) syncSave();
-  }, [coins, progress, theme, lang, hydrated]);
+  }, [coins, progress, theme, lang, solvedPictures, hydrated]);
 
   useEffect(() => {
     const recalc = () => {
@@ -1071,10 +1388,10 @@ export default function App() {
       const rect = stage.getBoundingClientRect();
       const width = rect.width || window.innerWidth;
       const size = difficulty.size;
-      const nextClueWidth = size >= 30 ? 50 : size >= 20 ? 58 : size >= 15 ? 68 : size >= 10 ? 82 : 96;
-      const maxByWidth = Math.floor((width - nextClueWidth - 26) / size);
-      const max = size <= 5 ? 56 : size <= 10 ? 38 : size <= 15 ? 28 : size <= 20 ? 23 : 17;
-      const min = size <= 5 ? 34 : size <= 10 ? 24 : size <= 15 ? 17 : size <= 20 ? 13 : 9;
+      const nextClueWidth = Math.max(44, Math.ceil(rowClueDepth * clueToken + 14));
+      const maxByWidth = Math.floor((width - nextClueWidth - 5) / size);
+      const max = size <= 5 ? 80 : size <= 10 ? 50 : size <= 15 ? 35 : size <= 20 ? 27 : 19;
+      const min = size <= 5 ? 40 : size <= 10 ? 27 : size <= 15 ? 18 : size <= 20 ? 14 : 9;
       setClueWidth(nextClueWidth);
       setCellSize(Math.max(min, Math.min(max, maxByWidth)));
     };
@@ -1090,7 +1407,7 @@ export default function App() {
       observer.disconnect();
       window.removeEventListener('resize', recalc);
     };
-  }, [difficulty.size]);
+  }, [clueToken, difficulty.size, rowClueDepth]);
 
   useEffect(() => () => {
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
@@ -1098,6 +1415,30 @@ export default function App() {
   }, []);
 
   const canGoNext = difficultyIndex < DIFFICULTIES.length - 1 && isDifficultyUnlocked(difficultyIndex + 1, progress);
+
+  const closeModalByBackdrop = () => {
+    if (!modal) return;
+    if (modal === 'rules' || modal === 'gallery') {
+      setModal(null);
+      return;
+    }
+    if (modal === 'pause') {
+      togglePause();
+      return;
+    }
+    if (modal === 'surrender') {
+      resetGame(difficultyIndex, false);
+      return;
+    }
+    if (modal === 'gameOver') {
+      resetGame(difficultyIndex, true);
+      return;
+    }
+    if (modal === 'win') {
+      if (canGoNext) nextLevel();
+      else resetGame(difficultyIndex, false);
+    }
+  };
 
   if (!hydrated) {
     return (
@@ -1153,8 +1494,8 @@ export default function App() {
             <div className="stats">
               <div className="stat life-stat">
                 <span className="stat-icon" aria-hidden="true">❤</span>
-                <span className="stat-label">{freeMode ? t.mistakes : t.lives}</span>
-                <span className="stat-value lives">{freeMode ? mistakeCount : '❤ '.repeat(lives).trim() || '0'}</span>
+                <span className="stat-label">{t.lives}</span>
+                <span className="stat-value lives">{'❤ '.repeat(lives).trim() || '0'}</span>
               </div>
               <div className="stat coin-stat">
                 <span className="stat-icon" aria-hidden="true">◉</span>
@@ -1261,21 +1602,29 @@ export default function App() {
             </div>
 
             <div className="board-wrap nonogram-wrap" ref={stageRef}>
-              <div className="nonogram-stage" style={{ '--cell': `${cellSize}px`, '--clueW': `${clueWidth}px` }}>
-                <div className="clue-corner">▥</div>
+              <div className="nonogram-stage" style={{ '--cell': `${cellSize}px`, '--clueW': `${clueWidth}px`, '--rowSlots': rowClueDepth, '--colSlots': colClueDepth, '--clueToken': `${clueToken}px` }}>
+                <div className="clue-corner" aria-hidden="true" />
                 <div className="col-clues" style={{ gridTemplateColumns: `repeat(${difficulty.size}, var(--cell))` }}>
-                  {colClues.map((clue, col) => (
-                    <div key={`col-${col}`} className={classNames('col-clue', clue.length === 1 && clue[0] === 0 && 'empty-clue')}>
-                      {clue.map((value, i) => <span key={`${col}-${i}`}>{value}</span>)}
-                    </div>
-                  ))}
+                  {colClues.map((clue, col) => {
+                    const pad = Math.max(0, colClueDepth - clue.length);
+                    return (
+                      <div key={`col-${col}`} className={classNames('col-clue', clue.length === 1 && clue[0] === 0 && 'empty-clue')}>
+                        {Array.from({ length: pad }, (_, i) => <span key={`pad-${col}-${i}`} className="clue-token ghost-token" />)}
+                        {clue.map((value, i) => <span key={`${col}-${i}`} className="clue-token">{value}</span>)}
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="row-clues">
-                  {rowClues.map((clue, row) => (
-                    <div key={`row-${row}`} className={classNames('row-clue', clue.length === 1 && clue[0] === 0 && 'empty-clue')} style={{ height: 'var(--cell)' }}>
-                      {clue.map((value, i) => <span key={`${row}-${i}`}>{value}</span>)}
-                    </div>
-                  ))}
+                  {rowClues.map((clue, row) => {
+                    const pad = Math.max(0, rowClueDepth - clue.length);
+                    return (
+                      <div key={`row-${row}`} className={classNames('row-clue', clue.length === 1 && clue[0] === 0 && 'empty-clue')} style={{ height: 'var(--cell)' }}>
+                        {Array.from({ length: pad }, (_, i) => <span key={`pad-${row}-${i}`} className="clue-token ghost-token" />)}
+                        {clue.map((value, i) => <span key={`${row}-${i}`} className="clue-token">{value}</span>)}
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="nonogram-board" style={{ gridTemplateColumns: `repeat(${difficulty.size}, var(--cell))` }}>
                   {marks.map((row, r) => row.map((cell, c) => (
@@ -1290,6 +1639,8 @@ export default function App() {
                         (c + 1) % 5 === 0 && c !== difficulty.size - 1 && 'chunk-right',
                         (r + 1) % 5 === 0 && r !== difficulty.size - 1 && 'chunk-bottom',
                       )}
+                      data-row={r}
+                      data-col={c}
                       onPointerDown={(event) => handlePointerDown(event, r, c, cell)}
                       onPointerEnter={(event) => handlePointerEnter(event, r, c)}
                       onPointerUp={handlePointerUp}
@@ -1323,7 +1674,6 @@ export default function App() {
                 <button className="tool-btn action-btn" type="button" disabled={isCompleting} onClick={togglePause}>{isPaused ? t.resume : t.pause}</button>
                 <button className="tool-btn action-btn" type="button" disabled={isPaused || isCompleting} onClick={() => setModal('gallery')}>{t.gallery}</button>
                 <button className="tool-btn action-btn" type="button" disabled={isPaused || isCompleting} onClick={useHint}>{t.hint}</button>
-                <button className="tool-btn action-btn" type="button" disabled={isPaused || isCompleting} onClick={checkPuzzle}>{t.check}</button>
                 <button className="tool-btn subtle action-btn" type="button" disabled={isPaused || isCompleting} onClick={surrender}>{t.surrender}</button>
               </div>
             </div>
@@ -1332,7 +1682,7 @@ export default function App() {
       </div>
 
       <div className={classNames('notification', !notification && 'hidden')} role="status" aria-live="polite">{notification}</div>
-      <div className={classNames('overlay', !modal && 'hidden')} />
+      <div className={classNames('overlay', !modal && 'hidden')} onClick={closeModalByBackdrop} />
 
       {modal === 'rules' && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
@@ -1363,21 +1713,41 @@ export default function App() {
               <button className="modal-close-btn" type="button" onClick={() => setModal(null)}>{t.close}</button>
             </div>
             <div className="gallery-grid">
-              {DIFFICULTIES.map((diff) => (
-                <section key={diff.id} className="gallery-section">
-                  <h3>{lang === 'ru' ? diff.ru : diff.en} · {diff.size}×{diff.size}</h3>
-                  <div className="gallery-cards">
-                    {PUZZLES[diff.id].map((item) => {
-                      const itemSolution = getSolution(item, diff.size);
-                      return (
-                        <div className="gallery-card" key={item.id}>
-                          <Preview solution={itemSolution} label={getPuzzleName(item, lang)} compact />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              ))}
+              {DIFFICULTIES.map((diff) => {
+                const openedIds = new Set(solvedPictures[diff.id] || []);
+                const items = PUZZLES[diff.id];
+                const openedCount = items.filter((item) => openedIds.has(item.id)).length;
+                const percent = Math.round((openedCount / items.length) * 100);
+
+                return (
+                  <section key={diff.id} className="gallery-section">
+                    <div className="gallery-section-head">
+                      <h3>{lang === 'ru' ? diff.ru : diff.en} · {diff.size}×{diff.size}</h3>
+                      <span className="gallery-counter">{openedCount}/{items.length} · {percent}%</span>
+                    </div>
+                    <div className="gallery-progressbar" aria-hidden="true"><span style={{ width: `${percent}%` }} /></div>
+                    <div className="gallery-cards">
+                      {items.map((item, index) => {
+                        const isOpened = openedIds.has(item.id);
+                        if (!isOpened) {
+                          return (
+                            <div className="gallery-card gallery-card-locked" key={item.id}>
+                              <div className="locked-preview"><span>🔒</span></div>
+                              <div className="preview-label">{lang === 'ru' ? `Рисунок ${index + 1}` : `Picture ${index + 1}`}</div>
+                            </div>
+                          );
+                        }
+                        const itemSolution = getSolution(item, diff.size);
+                        return (
+                          <div className="gallery-card" key={item.id}>
+                            <Preview solution={itemSolution} label={getPuzzleName(item, lang)} compact />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1417,10 +1787,16 @@ export default function App() {
           <div className="modal-card result-modal-card">
             <h2>{t.winTitle}</h2>
             <Preview solution={solution} label={puzzleName} />
-            <p className="modal-text">{t.winText(puzzleName, difficulty.reward)}</p>
+            <p className="modal-text">{t.winText(puzzleName, lastReward)}</p>
             <div className="modal-actions">
-              <button className="tool-btn primary" type="button" onClick={nextLevel}>{canGoNext ? t.nextLevel : t.playAgain}</button>
-              <button className="tool-btn" type="button" onClick={() => resetGame(difficultyIndex, false)}>{t.playAgain}</button>
+              {canGoNext ? (
+                <>
+                  <button className="tool-btn primary" type="button" onClick={nextLevel}>{t.nextLevel}</button>
+                  <button className="tool-btn" type="button" onClick={() => resetGame(difficultyIndex, false)}>{t.playAgain}</button>
+                </>
+              ) : (
+                <button className="tool-btn primary" type="button" onClick={() => resetGame(difficultyIndex, false)}>{t.playAgain}</button>
+              )}
             </div>
           </div>
         </div>
