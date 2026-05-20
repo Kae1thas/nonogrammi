@@ -1016,6 +1016,7 @@ export default function App() {
     setIsCompleting(true);
     stopGameplay();
     setTimerActive(false);
+    setLives(difficulty.lives);
     setMarks(revealPictureMarks(solution));
 
     const alreadySolved = (solvedPictures[difficulty.id] || []).includes(puzzle.id);
@@ -1465,6 +1466,7 @@ export default function App() {
   }, [coins, progress, theme, lang, solvedPictures, hydrated]);
 
   useLayoutEffect(() => {
+    if (!hydrated) return undefined;
     let rafId = 0;
     const timers = [];
 
@@ -1565,7 +1567,7 @@ export default function App() {
       window.removeEventListener('resize', scheduleRecalc);
       window.removeEventListener('orientationchange', scheduleRecalc);
     };
-  }, [difficultyIndex, difficulty.size, puzzleIndex, rowClueDepth, colClueDepth, freeMode]);
+  }, [hydrated, difficultyIndex, difficulty.size, puzzleIndex, rowClueDepth, colClueDepth, freeMode]);
 
   useEffect(() => () => {
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
@@ -1589,7 +1591,7 @@ export default function App() {
       return;
     }
     if (modal === 'gameOver') {
-      resetGame(difficultyIndex, true);
+      resetGame(difficultyIndex, false);
       return;
     }
     if (modal === 'win') {
@@ -1934,7 +1936,7 @@ export default function App() {
             </div>
             <div className="modal-actions">
               <button className="tool-btn primary" type="button" onClick={buyLife}>{t.buyLife}</button>
-              <button className="tool-btn danger" type="button" onClick={() => resetGame(difficultyIndex, true)}>{t.restart}</button>
+              <button className="tool-btn danger" type="button" onClick={() => resetGame(difficultyIndex, false)}>{t.restart}</button>
             </div>
           </div>
         </div>
