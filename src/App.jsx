@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 const STORAGE_KEYS = {
   coins: 'nonograms_code_picture_coins_v2',
@@ -18,82 +18,75 @@ const DIFFICULTIES = [
   { id: 'easy', size: 5, reward: 18, lives: 3, starterCrosses: false, ru: 'Лёгкий', en: 'Easy', metaRu: '5×5 · короткие рисунки', metaEn: '5×5 · small pictures' },
   { id: 'medium', size: 10, reward: 35, lives: 3, starterCrosses: false, ru: 'Средний', en: 'Medium', metaRu: '10×10 · полноценная логика', metaEn: '10×10 · full logic' },
   { id: 'hard', size: 15, reward: 55, lives: 3, starterCrosses: false, ru: 'Сложный', en: 'Hard', metaRu: '15×15 · крупный силуэт', metaEn: '15×15 · larger silhouette' },
-  { id: 'epic', size: 20, reward: 85, lives: 3, starterCrosses: false, ru: 'Эпический', en: 'Epic', metaRu: '20×20 · большая картинка', metaEn: '20×20 · big picture' },
-  { id: 'abyss', size: 30, reward: 130, lives: 3, starterCrosses: false, ru: 'Бездна', en: 'Abyss', metaRu: '30×30 · максимальный формат', metaEn: '30×30 · maximum format' },
+  { id: 'abyss', size: 15, reward: 95, lives: 2, starterCrosses: false, hardcore: true, ru: 'Бездна', en: 'Abyss', metaRu: '15×15 · 2 жизни, подсказки платные', metaEn: '15×15 · 2 lives, paid hints' },
 ];
 
 const PUZZLES = {
   warmup: [
-    { id: 'heart5w', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
-    { id: 'house5w', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
-    { id: 'tree5w', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
-    { id: 'cup5w', nameRu: 'Кубок', nameEn: 'Cup', rows: ['11111', '10101', '01110', '00100', '01110'] },
-    { id: 'flag5w', nameRu: 'Флажок', nameEn: 'Flag', rows: ['11100', '10100', '11100', '00100', '00100'] },
-    { id: 'bolt5w', nameRu: 'Молния', nameEn: 'Bolt', rows: ['00110', '01100', '11110', '00110', '01100'] },
-    { id: 'arrow5w', nameRu: 'Стрелка', nameEn: 'Arrow', rows: ['00100', '01100', '11111', '01100', '00100'] },
-    { id: 'duck5w', nameRu: 'Утка', nameEn: 'Duck', rows: ['01100', '11110', '10111', '11110', '00100'] },
+    { id: 'warm_heart', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
+    { id: 'warm_house', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
+    { id: 'warm_tree', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
+    { id: 'warm_cup', nameRu: 'Кубок', nameEn: 'Cup', rows: ['11111', '10101', '01110', '00100', '01110'] },
+    { id: 'warm_flag', nameRu: 'Флажок', nameEn: 'Flag', rows: ['11100', '10100', '11100', '00100', '00100'] },
+    { id: 'warm_bolt', nameRu: 'Молния', nameEn: 'Bolt', rows: ['00110', '01100', '11110', '00110', '01100'] },
+    { id: 'warm_arrow', nameRu: 'Стрелка', nameEn: 'Arrow', rows: ['00100', '01100', '11111', '01100', '00100'] },
+    { id: 'warm_boat', nameRu: 'Лодка', nameEn: 'Boat', rows: ['00100', '01110', '11111', '01110', '01010'] },
   ],
   easy: [
-    { id: 'heart5', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
-    { id: 'house5', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
-    { id: 'tree5', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
-    { id: 'rocket5', nameRu: 'Ракета', nameEn: 'Rocket', rows: ['00100', '01110', '00100', '01110', '10101'] },
-    { id: 'fish5', nameRu: 'Рыбка', nameEn: 'Fish', rows: ['00110', '11101', '11110', '11101', '00110'] },
-    { id: 'key5', nameRu: 'Ключ', nameEn: 'Key', rows: ['01100', '10111', '01100', '00100', '00111'] },
-    { id: 'star5', nameRu: 'Звезда', nameEn: 'Star', rows: ['00100', '10101', '01110', '11111', '01010'] },
-    { id: 'boat5', nameRu: 'Лодка', nameEn: 'Boat', rows: ['00100', '01100', '11110', '01111', '00110'] },
-    { id: 'crown5', nameRu: 'Корона', nameEn: 'Crown', rows: ['10101', '11111', '11111', '01110', '11111'] },
-    { id: 'moon5', nameRu: 'Луна', nameEn: 'Moon', rows: ['01110', '11100', '11000', '11100', '01110'] },
+    { id: 'easy_heart', nameRu: 'Сердце', nameEn: 'Heart', rows: ['01010', '11111', '11111', '01110', '00100'] },
+    { id: 'easy_house', nameRu: 'Домик', nameEn: 'House', rows: ['00100', '01110', '11111', '10101', '11111'] },
+    { id: 'easy_tree', nameRu: 'Ёлка', nameEn: 'Tree', rows: ['00100', '01110', '11111', '00100', '01110'] },
+    { id: 'easy_rocket', nameRu: 'Ракета', nameEn: 'Rocket', rows: ['00100', '01110', '00100', '01110', '10101'] },
+    { id: 'easy_fish', nameRu: 'Рыбка', nameEn: 'Fish', rows: ['00110', '11101', '11110', '11101', '00110'] },
+    { id: 'easy_key', nameRu: 'Ключ', nameEn: 'Key', rows: ['01100', '10111', '01100', '00100', '00111'] },
+    { id: 'easy_star', nameRu: 'Звезда', nameEn: 'Star', rows: ['00100', '10101', '01110', '11111', '01010'] },
+    { id: 'easy_crown', nameRu: 'Корона', nameEn: 'Crown', rows: ['10101', '11111', '11111', '01110', '11111'] },
+    { id: 'easy_moon', nameRu: 'Луна', nameEn: 'Moon', rows: ['01110', '11100', '11000', '11100', '01110'] },
+    { id: 'easy_flower', nameRu: 'Цветок', nameEn: 'Flower', rows: ['10101', '01110', '11111', '00100', '01110'] },
   ],
   medium: [
-    { id: 'fish10', nameRu: 'Рыба', nameEn: 'Fish', draw: 'fish' },
-    { id: 'key10', nameRu: 'Ключ', nameEn: 'Key', draw: 'key' },
-    { id: 'rocket10', nameRu: 'Ракета', nameEn: 'Rocket', draw: 'rocket' },
-    { id: 'tree10', nameRu: 'Дерево', nameEn: 'Tree', draw: 'tree' },
-    { id: 'ghost10', nameRu: 'Призрак', nameEn: 'Ghost', draw: 'ghost' },
-    { id: 'crown10', nameRu: 'Корона', nameEn: 'Crown', draw: 'crown' },
-    { id: 'turtle10', nameRu: 'Черепаха', nameEn: 'Turtle', draw: 'turtle' },
-    { id: 'ship10', nameRu: 'Кораблик', nameEn: 'Ship', draw: 'ship' },
-    { id: 'robot10', nameRu: 'Робот', nameEn: 'Robot', draw: 'robot' },
-    { id: 'anchor10', nameRu: 'Якорь', nameEn: 'Anchor', draw: 'anchor' },
-    { id: 'cactus10', nameRu: 'Кактус', nameEn: 'Cactus', draw: 'cactus' },
-    { id: 'trophy10', nameRu: 'Кубок', nameEn: 'Trophy', draw: 'trophy' },
+    { id: 'medium_question', nameRu: 'Вопрос', nameEn: 'Question', rows: ['0011111100', '0110000110', '0110000110', '0000000110', '0000001110', '0000111100', '0000110000', '0000000000', '0000110000', '0000110000'] },
+    { id: 'medium_alarm', nameRu: 'Будильник', nameEn: 'Alarm', rows: ['0011111000', '0111111100', '1110011110', '1100000110', '1011001101', '1001001001', '1011111001', '1100000110', '0111111100', '1111111110'] },
+    { id: 'medium_car', nameRu: 'Машина', nameEn: 'Car', rows: ['0001111000', '0011001100', '0110110110', '1111111111', '1111111111', '1100000011', '1111111111', '0110000110', '0110000110', '0000000000'] },
+    { id: 'medium_umbrella', nameRu: 'Зонт', nameEn: 'Umbrella', rows: ['0001111000', '0011111100', '0111111110', '1111111111', '1010101011', '0000110000', '0000110000', '0000110000', '0000011000', '0000011110'] },
+    { id: 'medium_teapot', nameRu: 'Чайник', nameEn: 'Teapot', rows: ['0000110000', '0011111100', '0111111110', '1111111111', '1011111111', '1011111111', '0111111110', '0011111100', '0001111000', '0000000000'] },
+    { id: 'medium_fish', nameRu: 'Рыба', nameEn: 'Fish', rows: ['0000110000', '0011111101', '0111111111', '1110111111', '1111111111', '1111111111', '0111111111', '0011111101', '0000110000', '0000000000'] },
+    { id: 'medium_key', nameRu: 'Ключ', nameEn: 'Key', rows: ['0011100000', '0100011110', '1000010000', '0100010100', '0011110100', '0000011110', '0000000000', '0000000000', '0000000000', '0000000000'] },
+    { id: 'medium_ghost', nameRu: 'Призрак', nameEn: 'Ghost', rows: ['0001111000', '0011111100', '0111111110', '0110110110', '0111111110', '0111111110', '0111111110', '0111011110', '0111011110', '0000000000'] },
+    { id: 'medium_anchor', nameRu: 'Якорь', nameEn: 'Anchor', rows: ['0000110000', '0001111000', '0000110000', '1111111111', '0000110000', '0000110000', '1000110001', '1100110011', '0111111110', '0001111000'] },
+    { id: 'medium_cactus', nameRu: 'Кактус', nameEn: 'Cactus', rows: ['0001100000', '0001100110', '1101100110', '1101100110', '1111111110', '0001100000', '0001100000', '0001100000', '0011110000', '0000000000'] },
   ],
   hard: [
-    { id: 'ship15', nameRu: 'Парусник', nameEn: 'Sailboat', draw: 'ship' },
-    { id: 'cat15', nameRu: 'Кот', nameEn: 'Cat', draw: 'cat' },
-    { id: 'robot15', nameRu: 'Робот', nameEn: 'Robot', draw: 'robot' },
-    { id: 'lighthouse15', nameRu: 'Маяк', nameEn: 'Lighthouse', draw: 'lighthouse' },
-    { id: 'mushroom15', nameRu: 'Гриб', nameEn: 'Mushroom', draw: 'mushroom' },
-    { id: 'guitar15', nameRu: 'Гитара', nameEn: 'Guitar', draw: 'guitar' },
-    { id: 'butterfly15', nameRu: 'Бабочка', nameEn: 'Butterfly', draw: 'butterfly' },
-    { id: 'skull15', nameRu: 'Череп', nameEn: 'Skull', draw: 'skull' },
-    { id: 'dragon15', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
-    { id: 'phoenix15', nameRu: 'Феникс', nameEn: 'Phoenix', draw: 'phoenix' },
+    { id: 'hard_sailboat', nameRu: 'Парусник', nameEn: 'Sailboat', baseRows: ['000000010000000','000000011000000','000000011100000','000000111100000','000001111110000','000001111111000','000011111111100','000111111111110','000111111111111','000000011111111','000000011111111','111111111111110','001111111111100','000000000000000','000000000000000'] },
+    { id: 'hard_cat', nameRu: 'Кот', nameEn: 'Cat', baseRows: ['001100000000110','001100000000110','011101111111110','011111111111111','011111111111111','011111111111111','111100111100111','111100111100111','011111111111111','011111111111111','001111000011110','000111111111100','000011111111000','000000000000000','000000000000000'] },
+    { id: 'hard_robot', nameRu: 'Робот', nameEn: 'Robot', baseRows: ['000011111111000','000011111111000','000010011001000','000010011001000','000011111111000','000111111111100','111111111111111','111111111111111','111111111111111','000111111111100','000001100110000','000001100110000','000001100110000','000000000000000','000000000000000'] },
+    { id: 'hard_lighthouse', nameRu: 'Маяк', nameEn: 'Lighthouse', baseRows: ['000011111110000','111111111110000','000011111111111','000011111111111','000000111000000','000000111000000','000000111100000','000000111100000','000001111100000','000001111100000','000001111100000','000111111111000','000000000000000','000000000000000','000000000000000'] },
+    { id: 'hard_mushroom', nameRu: 'Гриб', nameEn: 'Mushroom', baseRows: ['000000011000000','000111111111100','001111111111110','011100110001111','011000010001111','111000000001111','011100100011111','011111100011111','000111111111100','000000111100000','000000111100000','000000111100000','000000111100000','000000111100000','000000000000000'] },
+    { id: 'hard_guitar', nameRu: 'Гитара', nameEn: 'Guitar', baseRows: ['000000000000011','000001111000011','000011111100100','000111111111000','000110011110000','001100001110000','011100001110000','011100001100000','111111111100000','111111111100000','011111111000000','011111111000000','001111111000000','000111110000000','000000000000000'] },
+    { id: 'hard_panda', nameRu: 'Панда', nameEn: 'Panda', baseRows: ['000100000000100','011111111111111','111111111111111','111111111111111','011111111111111','011000111000111','011000111000111','011111111111111','011111000111111','001111111111110','001111111111110','000111111111100','000001111110000','000000000000000','000000000000000'] },
+    { id: 'hard_dog', nameRu: 'Пёс', nameEn: 'Dog', baseRows: ['001101111110010','011111111111111','011111111111111','011111111111111','111111011011111','011111011011111','011111111111111','011111111111110','001111111111110','000111111111100','000011111111000','000001111110000','000000000000000','000000000000000','000000000000000'] },
   ],
   epic: [
-    { id: 'castle20', nameRu: 'Замок', nameEn: 'Castle', draw: 'castle' },
-    { id: 'dragon20', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
-    { id: 'owl20', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
-    { id: 'rocket20', nameRu: 'Ракета', nameEn: 'Rocket', draw: 'rocket' },
-    { id: 'wizard20', nameRu: 'Волшебник', nameEn: 'Wizard', draw: 'wizard' },
-    { id: 'spaceship20', nameRu: 'Космолёт', nameEn: 'Spaceship', draw: 'spaceship' },
-    { id: 'anchor20', nameRu: 'Якорь', nameEn: 'Anchor', draw: 'anchor' },
-    { id: 'butterfly20', nameRu: 'Бабочка', nameEn: 'Butterfly', draw: 'butterfly' },
-    { id: 'cactus20', nameRu: 'Кактус', nameEn: 'Cactus', draw: 'cactus' },
-    { id: 'trophy20', nameRu: 'Кубок', nameEn: 'Trophy', draw: 'trophy' },
+    { id: 'epic_dragon', nameRu: 'Дракон', nameEn: 'Dragon', baseRows: ['000000000001110','000000000011110','000110000111111','000111100111111','000111111111110','001111111111000','111111111111100','111111111111100','111111111111000','110011111111000','000001111011000','000000011001000','000000000000000','000000000000000','000000000000000'] },
+    { id: 'epic_camera', nameRu: 'Камера', nameEn: 'Camera', baseRows: ['000111111000000','001111111011100','111111111111111','111100000111111','111001110011111','111001010011111','111001110011111','111100000111111','111111111111111','111111111111111','000000000000000','000000000000000','000000000000000','000000000000000','000000000000000'] },
+    { id: 'epic_wizard', nameRu: 'Волшебник', nameEn: 'Wizard', baseRows: ['000000010000111','000000111001111','000001111101111','000011111100110','000111111000110','111111111111110','001111111100110','001111111110110','000111111100110','000011111000110','000011111000110','000001111000110','000001111000110','000000000000000','000000000000000'] },
+    { id: 'epic_rocket', nameRu: 'Ракета', nameEn: 'Rocket', baseRows: ['000000010000000','000000111000000','000001111100000','000011111110000','000011111110000','000011111110000','000011111110000','000011111110000','111111111111111','111111111111111','111110111011111','000001111100000','000011111110000','000000000000000','000000000000000'] },
+    { id: 'epic_plant', nameRu: 'Росток', nameEn: 'Sprout', baseRows: ['000110000000000','001111000000000','011111001111000','111111111111100','011111111111110','000001111111110','000001000000000','000001000000000','001111111100000','001111111100000','001111111100000','000000000000000','000000000000000','000000000000000','000000000000000'] },
+    { id: 'epic_sailboat', nameRu: 'Парусник', nameEn: 'Sailboat', baseRows: ['000000010000000','000000011000000','000000111100000','000001111110000','000011111111000','000111111111100','001111111111110','000000111111111','000000010000000','111111111111100','001111111111000','000000000000000','000000000000000','000000000000000','000000000000000'] },
+    { id: 'epic_owl', nameRu: 'Сова', nameEn: 'Owl', baseRows: ['001100000001100','011111111111110','111111111111111','111000111000111','110000010000011','111000000000111','111100000001111','011100000001110','011110000011110','001111000111100','000111111111000','000011111110000','000000000000000','000000000000000','000000000000000'] },
+    { id: 'epic_airship', nameRu: 'Дирижабль', nameEn: 'Airship', baseRows: ['000001111100000','000111111111000','001111111111100','111111111111110','111111111111111','111111111111111','111111111111111','001111111111110','111111111111100','111110001000000','000000001000000','000000001000000','000000000000000','000000000000000','000000000000000'] },
   ],
   abyss: [
-    { id: 'airship30', nameRu: 'Дирижабль', nameEn: 'Airship', draw: 'airship' },
-    { id: 'submarine30', nameRu: 'Подлодка', nameEn: 'Submarine', draw: 'submarine' },
-    { id: 'phoenix30', nameRu: 'Феникс', nameEn: 'Phoenix', draw: 'phoenix' },
-    { id: 'owl30', nameRu: 'Сова', nameEn: 'Owl', draw: 'owl' },
-    { id: 'mecha30', nameRu: 'Меха', nameEn: 'Mecha', draw: 'mecha' },
-    { id: 'dragon30', nameRu: 'Дракон', nameEn: 'Dragon', draw: 'dragon' },
-    { id: 'city30', nameRu: 'Город', nameEn: 'City', draw: 'city' },
-    { id: 'train30', nameRu: 'Поезд', nameEn: 'Train', draw: 'train' },
-    { id: 'plane30', nameRu: 'Самолёт', nameEn: 'Plane', draw: 'plane' },
-    { id: 'fortress30', nameRu: 'Крепость', nameEn: 'Fortress', draw: 'fortress' },
+    { id: 'abyss_dragon', nameRu: 'Дракон', nameEn: 'Dragon', baseRows: ['000000000001110','000000000011110','000110000111111','000111100111111','000111111111110','001111111111000','111111111111100','111111111111100','111111111111000','110011111111000','000001111011000','000000011001000','000000111000000','000001101100000','000011000110000'] },
+    { id: 'abyss_owl', nameRu: 'Сова', nameEn: 'Owl', baseRows: ['001100000001100','011111111111110','111111111111111','111000111000111','110000010000011','111000000000111','111100000001111','011100000001110','011110000011110','001111000111100','000111111111000','000011111110000','000001111100000','000001000100000','000011000110000'] },
+    { id: 'abyss_mecha', nameRu: 'Мех', nameEn: 'Mech', baseRows: ['000011111110000','000010011010000','000011111110000','001111111111100','011101111101110','111101111101111','111111111111111','000111111111000','000111111111000','000011111110000','000001100110000','000011000011000','000110000001100','001100000000110','000000000000000'] },
+    { id: 'abyss_castle', nameRu: 'Крепость', nameEn: 'Fortress', baseRows: ['101010101010101','111111111111111','111111111111111','011101110111010','011101110111010','011111111111010','011111111111010','011110000111010','011110000111010','011110000111010','011111111111010','011111111111010','111111111111111','111111111111111','000000000000000'] },
+    { id: 'abyss_wizard', nameRu: 'Маг', nameEn: 'Wizard', baseRows: ['000000010000111','000000111001111','000001111101111','000011111100110','000111111000110','111111111111110','001111111100110','001111111110110','000111111100110','000011111000110','000011111000110','000001111000110','000001111000110','000001101100000','000011000110000'] },
+    { id: 'abyss_submarine', nameRu: 'Подлодка', nameEn: 'Submarine', baseRows: ['000000000111000','000000000100000','000000111110000','000011111111100','111111111111110','111111111111111','111110011011111','111110011011111','111111111111111','111111111111110','000011111111100','000001111111000','000000111100000','000000000000000','000000000000000'] },
+    { id: 'abyss_guitar', nameRu: 'Гитара', nameEn: 'Guitar', baseRows: ['000000000000011','000001111000011','000011111100100','000111111111000','000110011110000','001100001110000','011100001110000','011100001100000','111111111100000','111111111100000','011111111000000','011111111000000','001111111000000','000111110000000','000011000000000'] },
+    { id: 'abyss_lighthouse', nameRu: 'Маяк', nameEn: 'Lighthouse', baseRows: ['000011111110000','111111111110000','000011111111111','000011111111111','000000111000000','000000111000000','000000111100000','000000111100000','000001111100000','000001111100000','000001111100000','000111111111000','001111111111100','011111111111110','000000000000000'] },
+    { id: 'abyss_airship', nameRu: 'Дирижабль', nameEn: 'Airship', baseRows: ['000001111100000','000111111111000','001111111111100','111111111111110','111111111111111','111111111111111','111111111111111','001111111111110','111111111111100','111110001000000','000000001000000','000000001000000','000000111000000','000001111100000','000000000000000'] },
+    { id: 'abyss_phoenix', nameRu: 'Феникс', nameEn: 'Phoenix', baseRows: ['000000111000000','000001111100000','000011111110000','001111111111100','111111111111111','011111111111110','000111111111000','000000111000000','000000111000000','000000111000000','000001111100000','000011111110000','000111111111000','001100111001100','000000000000000'] },
   ],
 };
 
@@ -645,7 +638,7 @@ function fitMatrixToCanvas(matrix, targetSize, padding = 0) {
 function getSolution(puzzle, size) {
   if (puzzle.rows) return rowsToMatrix(puzzle.rows);
   const padding = size >= 20 ? 0 : size >= 15 ? 1 : 0;
-  if (puzzle.baseRows) return fitMatrixToCanvas(rowsToMatrix(puzzle.baseRows), size, padding);
+  if (puzzle.baseRows) return fitMatrixToCanvas(rowsToMatrix(puzzle.baseRows), size, 0);
   return fitMatrixToCanvas(drawByName(puzzle.draw, size), size, padding);
 }
 
@@ -751,11 +744,10 @@ function isFreeModeUnlocked(diffId, progress) {
 }
 
 function getFixedClueSlots(size) {
-  if (size <= 5) return 3;
-  if (size <= 10) return 4;
-  if (size <= 15) return 5;
-  if (size <= 20) return 6;
-  return 7;
+  if (size <= 5) return 2;
+  if (size <= 10) return 3;
+  if (size <= 15) return 4;
+  return 5;
 }
 
 function pickPuzzle(diffId, exceptIndex = -1, solvedIds = []) {
@@ -807,6 +799,7 @@ function installInteractionGuards(suppressClickRef) {
 
   const moveTracking = (event) => {
     if (!isTracking || event.touches.length !== 1) return;
+    if (document.body.dataset.nonogramPainting === 'true') return;
 
     const touch = event.touches[0];
     const dx = touch.clientX - startX;
@@ -918,6 +911,7 @@ export default function App() {
   const [hintUsed, setHintUsed] = useState(false);
   const [cellSize, setCellSize] = useState(38);
   const [clueWidth, setClueWidth] = useState(96);
+  const [clueToken, setClueToken] = useState(18);
   const [isCompleting, setIsCompleting] = useState(false);
   const [lastReward, setLastReward] = useState(0);
 
@@ -934,12 +928,18 @@ export default function App() {
   const puzzleName = getPuzzleName(puzzle, lang);
   const solution = useMemo(() => getSolution(puzzle, difficulty.size), [puzzle, difficulty.size]);
   const { rowClues, colClues } = useMemo(() => buildClues(solution), [solution]);
-  const rowClueDepth = getFixedClueSlots(difficulty.size);
-  const colClueDepth = getFixedClueSlots(difficulty.size);
+  const rowClueDepth = useMemo(() => Math.max(
+    getFixedClueSlots(difficulty.size),
+    ...rowClues.map((clue) => clue.length),
+  ), [difficulty.size, rowClues]);
+  const colClueDepth = useMemo(() => Math.max(
+    getFixedClueSlots(difficulty.size),
+    ...colClues.map((clue) => clue.length),
+  ), [colClues, difficulty.size]);
   const remaining = useMemo(() => countRemaining(marks, solution), [marks, solution]);
   const timeText = formatTime(elapsed);
   const freeUnlocked = isFreeModeUnlocked(difficulty.id, progress);
-  const clueToken = difficulty.size >= 30 ? 13 : difficulty.size >= 20 ? 15 : difficulty.size >= 15 ? 17 : difficulty.size >= 10 ? 19 : 22;
+  const hintIsPaid = Boolean(hintUsed || difficulty.hardcore);
 
   const showNotification = useCallback((text) => {
     setNotification(text);
@@ -970,7 +970,8 @@ export default function App() {
 
   const resetGame = useCallback((nextDifficultyIndex = difficultyIndex, keepPuzzleIndex = false, options = {}) => {
     const nextDifficulty = DIFFICULTIES[nextDifficultyIndex];
-    const nextFreeMode = options.freeMode ?? freeMode;
+    const unlockedFreeMode = isFreeModeUnlocked(nextDifficulty.id, progress);
+    const nextFreeMode = unlockedFreeMode ? true : Boolean(options.freeMode ?? freeMode);
     const solvedIds = solvedPictures[nextDifficulty.id] || [];
     const picked = keepPuzzleIndex
       ? { index: puzzleIndex }
@@ -996,7 +997,7 @@ export default function App() {
     setLastReward(0);
     winLockRef.current = false;
     dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set(), axis: null };
-  }, [difficultyIndex, freeMode, puzzleIndex, solvedPictures]);
+  }, [difficultyIndex, freeMode, progress, puzzleIndex, solvedPictures]);
 
   const stopGameplay = useCallback(() => {
     window.YandexStorage?.stopGameplay?.();
@@ -1024,7 +1025,7 @@ export default function App() {
     };
     setSolvedPictures(nextSolvedPictures);
 
-    if (alreadySolved) {
+    if (alreadySolved || freeMode) {
       setLastReward(0);
       syncSave({ solvedPictures: nextSolvedPictures });
     } else {
@@ -1043,7 +1044,7 @@ export default function App() {
     window.setTimeout(() => {
       setModal('win');
     }, 950);
-  }, [difficulty.id, difficulty.reward, puzzle.id, solution, solvedPictures, stopGameplay, syncSave]);
+  }, [difficulty.id, difficulty.reward, freeMode, puzzle.id, solution, solvedPictures, stopGameplay, syncSave]);
 
   const checkWinAfterMove = useCallback((nextMarks) => {
     if (isSolved(nextMarks, solution)) {
@@ -1104,9 +1105,91 @@ export default function App() {
     });
   }, [checkWinAfterMove, isCompleting, isPaused, lives, modal, showNotification, solution, startGameplay, stopGameplay, t.wrongCell, tool]);
 
+  const startDragPainting = useCallback((drag, event = null) => {
+    if (!drag || drag.started || drag.cancelled) return false;
+    drag.started = true;
+    document.body.dataset.nonogramPainting = 'true';
+    if (event?.currentTarget && drag.pointerType !== 'touch') {
+      event.currentTarget.setPointerCapture?.(drag.pointerId);
+    }
+    applyCell(drag.startRow, drag.startCol, drag.target, { fromDrag: false });
+    if (event?.cancelable) event.preventDefault();
+    return true;
+  }, [applyCell]);
+
+  const handlePointerDown = useCallback((event, row, col, currentMark) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+    const target = tool === 'cross'
+      ? (currentMark === 'filled' ? 'empty' : currentMark === 'cross' ? 'empty' : 'cross')
+      : (currentMark === 'cross' ? 'empty' : currentMark === 'filled' ? 'empty' : 'filled');
+
+    const drag = {
+      active: true,
+      started: false,
+      cancelled: false,
+      target,
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+      startRow: row,
+      startCol: col,
+      lastRow: row,
+      lastCol: col,
+      startX: event.clientX,
+      startY: event.clientY,
+      axis: null,
+      sourceMark: currentMark,
+      touched: new Set([`${row}:${col}`]),
+      holdTimer: null,
+    };
+
+    dragRef.current = drag;
+
+    if (event.pointerType === 'mouse') {
+      event.preventDefault();
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      startDragPainting(drag, event);
+      return;
+    }
+
+    // На телефоне не включаем рисование мгновенно: быстрый вертикальный свайп
+    // должен скроллить страницу, а вертикальное рисование запускается после короткого удержания.
+    drag.holdTimer = window.setTimeout(() => {
+      if (dragRef.current === drag && drag.active && !drag.cancelled) {
+        startDragPainting(drag);
+      }
+    }, 85);
+  }, [startDragPainting, tool]);
+
   const applyDragPath = useCallback((row, col, event = null) => {
     const drag = dragRef.current;
-    if (!drag.active) return;
+    if (!drag.active || drag.cancelled) return;
+
+    if (!drag.started) {
+      const dx = (event?.clientX ?? drag.startX) - drag.startX;
+      const dy = (event?.clientY ?? drag.startY) - drag.startY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      if (drag.pointerType === 'touch') {
+        if (absY > 8 && absY > absX * 1.18) {
+          window.clearTimeout(drag.holdTimer);
+          drag.cancelled = true;
+          drag.active = false;
+          delete document.body.dataset.nonogramPainting;
+          return;
+        }
+        if (absX > 5 && absX > absY * 1.05) {
+          drag.axis = 'horizontal';
+          window.clearTimeout(drag.holdTimer);
+          startDragPainting(drag, event);
+        } else {
+          return;
+        }
+      } else {
+        startDragPainting(drag, event);
+      }
+    }
 
     let axis = drag.axis;
     if (!axis && (row !== drag.startRow || col !== drag.startCol)) {
@@ -1137,31 +1220,7 @@ export default function App() {
     drag.lastRow = row;
     drag.lastCol = col;
     if (event?.cancelable) event.preventDefault();
-  }, [applyCell]);
-
-  const handlePointerDown = useCallback((event, row, col, currentMark) => {
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-
-    const target = tool === 'cross'
-      ? (currentMark === 'cross' ? 'empty' : 'cross')
-      : (currentMark === 'filled' ? 'empty' : 'filled');
-
-    dragRef.current = {
-      active: true,
-      target,
-      pointerId: event.pointerId,
-      startRow: row,
-      startCol: col,
-      lastRow: row,
-      lastCol: col,
-      axis: null,
-      sourceMark: currentMark,
-      touched: new Set([`${row}:${col}`]),
-    };
-    applyCell(row, col, target, { fromDrag: false });
-  }, [applyCell, tool]);
+  }, [applyCell, startDragPainting]);
 
   const handlePointerEnter = useCallback((event, row, col) => {
     const drag = dragRef.current;
@@ -1173,6 +1232,11 @@ export default function App() {
     const drag = dragRef.current;
     if (!drag.active || drag.pointerId !== event.pointerId) return;
 
+    if (!drag.started) {
+      applyDragPath(drag.startRow, drag.startCol, event);
+      return;
+    }
+
     const element = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('.nono-cell');
     if (!element) return;
 
@@ -1183,9 +1247,18 @@ export default function App() {
     applyDragPath(row, col, event);
   }, [applyDragPath]);
 
-  const handlePointerUp = useCallback(() => {
+  const handlePointerUp = useCallback((event = null) => {
+    const drag = dragRef.current;
+    if (drag?.holdTimer) window.clearTimeout(drag.holdTimer);
+
+    if (drag?.active && !drag.started && !drag.cancelled) {
+      applyCell(drag.startRow, drag.startCol, drag.target, { fromDrag: false });
+      if (event?.cancelable) event.preventDefault();
+    }
+
+    delete document.body.dataset.nonogramPainting;
     dragRef.current = { active: false, target: 'filled', pointerId: null, touched: new Set(), axis: null };
-  }, []);
+  }, [applyCell]);
 
   const useHint = useCallback(() => {
     if (isPaused || modal || isCompleting) return;
@@ -1202,13 +1275,15 @@ export default function App() {
       return;
     }
 
-    if (hintUsed && coins < HINT_PRICE) {
+    const paidHint = Boolean(hintUsed || difficulty.hardcore);
+
+    if (paidHint && coins < HINT_PRICE) {
       showNotification(t.notEnoughCoins);
       return;
     }
 
     const [r, c] = hidden[Math.floor(Math.random() * hidden.length)];
-    const nextCoins = hintUsed ? coins - HINT_PRICE : coins;
+    const nextCoins = paidHint ? coins - HINT_PRICE : coins;
     setCoins(nextCoins);
     setHintUsed(true);
     startGameplay();
@@ -1219,7 +1294,7 @@ export default function App() {
       return next;
     });
     syncSave({ coins: nextCoins });
-  }, [checkWinAfterMove, coins, hintUsed, isCompleting, isPaused, marks, modal, showNotification, solution, startGameplay, syncSave, t.noHints, t.notEnoughCoins]);
+  }, [checkWinAfterMove, coins, difficulty.hardcore, hintUsed, isCompleting, isPaused, marks, modal, showNotification, solution, startGameplay, syncSave, t.noHints, t.notEnoughCoins]);
 
   const checkPuzzle = useCallback(() => {
     if (isPaused || modal || isCompleting) return;
@@ -1263,19 +1338,20 @@ export default function App() {
       showNotification(t.freeLockedMessage(lang === 'ru' ? difficulty.ru : difficulty.en));
       return;
     }
-    const nextFreeMode = !freeMode;
-    setFreeMode(nextFreeMode);
-    resetGame(difficultyIndex, false, { freeMode: nextFreeMode });
+    if (!freeMode) {
+      setFreeMode(true);
+      resetGame(difficultyIndex, false, { freeMode: true });
+    }
   }, [difficulty, difficultyIndex, freeMode, isCompleting, isPaused, lang, modal, progress, resetGame, showNotification, t]);
 
   const selectDifficulty = useCallback((index) => {
     if (isPaused || modal || isCompleting) return;
     if (!isDifficultyUnlocked(index, progress)) return;
     const nextDifficulty = DIFFICULTIES[index];
-    const nextFreeMode = freeMode && isFreeModeUnlocked(nextDifficulty.id, progress);
+    const nextFreeMode = isFreeModeUnlocked(nextDifficulty.id, progress);
     setFreeMode(nextFreeMode);
     resetGame(index, false, { freeMode: nextFreeMode });
-  }, [freeMode, isCompleting, isPaused, modal, progress, resetGame]);
+  }, [isCompleting, isPaused, modal, progress, resetGame]);
 
   const nextLevel = useCallback(() => {
     const nextIndex = Math.min(difficultyIndex + 1, DIFFICULTIES.length - 1);
@@ -1337,6 +1413,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (hydrated && freeUnlocked && !freeMode && !isCompleting && !modal) {
+      setFreeMode(true);
+      resetGame(difficultyIndex, false, { freeMode: true });
+    }
+  }, [difficultyIndex, freeMode, freeUnlocked, hydrated, isCompleting, modal, resetGame]);
+
+  useEffect(() => {
     document.body.dataset.theme = theme;
     document.body.dataset.lang = lang;
     document.body.dataset.boardSize = String(difficulty.size);
@@ -1381,33 +1464,108 @@ export default function App() {
     if (hydrated) syncSave();
   }, [coins, progress, theme, lang, solvedPictures, hydrated]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    let rafId = 0;
+    const timers = [];
+
     const recalc = () => {
       const stage = stageRef.current;
       if (!stage) return;
-      const rect = stage.getBoundingClientRect();
-      const width = rect.width || window.innerWidth;
+
       const size = difficulty.size;
-      const nextClueWidth = Math.max(44, Math.ceil(rowClueDepth * clueToken + 14));
-      const maxByWidth = Math.floor((width - nextClueWidth - 5) / size);
-      const max = size <= 5 ? 80 : size <= 10 ? 50 : size <= 15 ? 35 : size <= 20 ? 27 : 19;
-      const min = size <= 5 ? 40 : size <= 10 ? 27 : size <= 15 ? 18 : size <= 20 ? 14 : 9;
+      const stageRect = stage.getBoundingClientRect();
+      const style = window.getComputedStyle(stage);
+      const padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+      const isPhoneLayout = window.innerWidth <= 900;
+      const isDesktopLayout = window.innerWidth > 1180;
+      const availableWidth = Math.max(
+        220,
+        Math.floor((stage.clientWidth || stageRect.width || window.innerWidth) - padX),
+      );
+
+      // 0.0.11: поле считается и по ширине, и по высоте. На телефоне оно
+      // стремится к краям, а на ПК не раздувается так, чтобы приходилось
+      // скроллить страницу ради кнопок и боковых панелей.
+      const nextToken = size >= 15 ? (isPhoneLayout ? 11 : 13)
+        : size >= 10 ? (isPhoneLayout ? 14 : 16)
+          : (isPhoneLayout ? 18 : 20);
+
+      const minClueWidth = size >= 15 ? (isPhoneLayout ? 46 : 52)
+        : size >= 10 ? 54
+          : 58;
+
+      const nextClueWidth = Math.max(
+        minClueWidth,
+        rowClueDepth * nextToken + (isPhoneLayout ? 6 : 9),
+      );
+
+      const stageGap = size >= 15 ? 2 : 3;
+      const maxByWidth = Math.floor((availableWidth - nextClueWidth - stageGap) / size);
+
+      let maxByHeight = Number.POSITIVE_INFINITY;
+      if (isDesktopLayout) {
+        const app = document.querySelector('.app');
+        const topbar = document.querySelector('.topbar');
+        const modeRow = document.querySelector('.mode-row');
+        const boardHead = document.querySelector('.board-head');
+        const numberPad = document.querySelector('.number-pad');
+        const appStyle = app ? window.getComputedStyle(app) : null;
+        const appPadY = appStyle
+          ? (parseFloat(appStyle.paddingTop) || 0) + (parseFloat(appStyle.paddingBottom) || 0)
+          : 36;
+        const topbarH = topbar?.getBoundingClientRect().height || 0;
+        const modeH = modeRow?.getBoundingClientRect().height || 0;
+        const headH = boardHead?.getBoundingClientRect().height || 0;
+        const padH = numberPad?.getBoundingClientRect().height || 0;
+        const centerGaps = 52;
+        const platformReserve = window.innerHeight < 900 ? 34 : 18;
+        const availableHeight = Math.max(
+          180,
+          window.innerHeight - appPadY - topbarH - modeH - headH - padH - centerGaps - platformReserve,
+        );
+        const topCluesHeight = colClueDepth * nextToken + 12;
+        maxByHeight = Math.floor((availableHeight - topCluesHeight - stageGap) / size);
+      }
+
+      const hardMin = size <= 5 ? 34 : size <= 10 ? 22 : 14;
+      const softMax = size <= 5 ? (isDesktopLayout ? 104 : 96)
+        : size <= 10 ? (isDesktopLayout ? 62 : 58)
+          : (isDesktopLayout ? 44 : 42);
+      const nextCell = Math.max(hardMin, Math.min(softMax, maxByWidth, maxByHeight));
+
+      setClueToken(nextToken);
       setClueWidth(nextClueWidth);
-      setCellSize(Math.max(min, Math.min(max, maxByWidth)));
+      setCellSize(nextCell);
     };
 
-    recalc();
-    const observer = new ResizeObserver(recalc);
+    const scheduleRecalc = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(recalc);
+    };
+
+    scheduleRecalc();
+    timers.push(window.setTimeout(scheduleRecalc, 60));
+    timers.push(window.setTimeout(scheduleRecalc, 180));
+    timers.push(window.setTimeout(scheduleRecalc, 420));
+    timers.push(window.setTimeout(scheduleRecalc, 900));
+
+    const observer = new ResizeObserver(scheduleRecalc);
     if (stageRef.current) observer.observe(stageRef.current);
-    window.addEventListener('resize', recalc);
-    window.setTimeout(recalc, 150);
-    window.setTimeout(recalc, 500);
+    const center = document.querySelector('.center');
+    const shell = document.querySelector('.game-shell');
+    if (center) observer.observe(center);
+    if (shell) observer.observe(shell);
+    window.addEventListener('resize', scheduleRecalc);
+    window.addEventListener('orientationchange', scheduleRecalc);
 
     return () => {
+      window.cancelAnimationFrame(rafId);
+      timers.forEach((timer) => window.clearTimeout(timer));
       observer.disconnect();
-      window.removeEventListener('resize', recalc);
+      window.removeEventListener('resize', scheduleRecalc);
+      window.removeEventListener('orientationchange', scheduleRecalc);
     };
-  }, [clueToken, difficulty.size, rowClueDepth]);
+  }, [difficultyIndex, difficulty.size, puzzleIndex, rowClueDepth, colClueDepth, freeMode]);
 
   useEffect(() => () => {
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
@@ -1575,7 +1733,7 @@ export default function App() {
               <button
                 className={classNames('mode-switch endless-switch', freeMode && 'active', !freeUnlocked && 'locked')}
                 type="button"
-                disabled={isPaused || isCompleting}
+                disabled={isPaused || isCompleting || freeUnlocked}
                 onClick={toggleFreeMode}
               >
                 <span className="endless-icon" aria-hidden="true">∞</span>
@@ -1583,7 +1741,7 @@ export default function App() {
                   <span className="endless-title">{t.freeMode}</span>
                   <span className="endless-meta">{freeUnlocked ? t.freeModeMetaOpen : t.freeModeMetaLocked}</span>
                 </span>
-                <span className="endless-badge">{freeMode ? t.enabled : freeUnlocked ? 'OK' : t.locked}</span>
+                <span className="endless-badge">{freeUnlocked ? t.enabled : t.locked}</span>
               </button>
             </div>
 
@@ -1598,7 +1756,7 @@ export default function App() {
                   <span className="mobile-time-value">{timeText}</span>
                 </div>
               </div>
-              <div className="hint-meta"><span>{t.cellsLeft(remaining)}</span><span>{hintUsed ? t.hintStatePaid : t.hintStateFree}</span></div>
+              <div className="hint-meta"><span>{t.cellsLeft(remaining)}</span><span>{hintIsPaid ? t.hintStatePaid : t.hintStateFree}</span></div>
             </div>
 
             <div className="board-wrap nonogram-wrap" ref={stageRef}>
